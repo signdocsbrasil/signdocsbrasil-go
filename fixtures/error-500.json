@@ -1,0 +1,17 @@
+{
+  "description": "Internal server error",
+  "response": {
+    "status": 500,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/internal",
+      "title": "Internal Server Error",
+      "status": 500,
+      "detail": "An unexpected error occurred"
+    }
+  },
+  "expected_error": {
+    "class": "InternalServerError",
+    "status": 500
+  }
+}

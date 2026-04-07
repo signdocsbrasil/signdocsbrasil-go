@@ -1,0 +1,29 @@
+{
+  "description": "Prepare digital signature (A1 certificate)",
+  "input": {
+    "transactionId": "tx-uuid-001",
+    "certificateChainPems": [
+      "-----BEGIN CERTIFICATE-----\nMIIB...leaf...\n-----END CERTIFICATE-----",
+      "-----BEGIN CERTIFICATE-----\nMIIB...intermediate...\n-----END CERTIFICATE-----"
+    ]
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/transactions/tx-uuid-001/signing/prepare",
+    "body": {
+      "certificateChainPems": [
+        "-----BEGIN CERTIFICATE-----\nMIIB...leaf...\n-----END CERTIFICATE-----",
+        "-----BEGIN CERTIFICATE-----\nMIIB...intermediate...\n-----END CERTIFICATE-----"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "signatureRequestId": "sigreq-uuid-001",
+      "hashToSign": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "hashAlgorithm": "SHA-256",
+      "signatureAlgorithm": "RSASSA-PKCS1-v1_5"
+    }
+  }
+}

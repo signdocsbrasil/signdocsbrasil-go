@@ -1,0 +1,17 @@
+{
+  "description": "Not found error",
+  "response": {
+    "status": 404,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/not-found",
+      "title": "Not Found",
+      "status": 404,
+      "detail": "Transaction tx-nonexistent not found"
+    }
+  },
+  "expected_error": {
+    "class": "NotFoundError",
+    "status": 404
+  }
+}

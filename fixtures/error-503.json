@@ -1,0 +1,20 @@
+{
+  "description": "Service unavailable (transient)",
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "Retry-After": "10"
+    },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/service-unavailable",
+      "title": "Service Unavailable",
+      "status": 503,
+      "detail": "DynamoDB throughput exceeded"
+    }
+  },
+  "expected_error": {
+    "class": "ServiceUnavailableError",
+    "status": 503
+  }
+}

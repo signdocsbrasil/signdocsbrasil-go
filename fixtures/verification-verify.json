@@ -1,0 +1,36 @@
+{
+  "description": "Verify evidence (public endpoint, no auth)",
+  "input": {
+    "evidenceId": "ev-uuid-001"
+  },
+  "expected_request": {
+    "method": "GET",
+    "path": "/v1/verify/ev-uuid-001",
+    "no_auth": true
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "evidenceId": "ev-uuid-001",
+      "status": "COMPLETED",
+      "transactionId": "tx-uuid-001",
+      "purpose": "DOCUMENT_SIGNATURE",
+      "documentHash": "sha256-doc-hash",
+      "evidenceHash": "sha256-evidence-hash",
+      "policy": {"profile": "CLICK_ONLY"},
+      "steps": [
+        {
+          "type": "CLICK_ACCEPT",
+          "status": "COMPLETED",
+          "completedAt": "2024-11-15T00:00:45.000Z"
+        }
+      ],
+      "signer": {
+        "displayName": "João Silva"
+      },
+      "tenantName": "Acme Corp",
+      "createdAt": "2024-11-15T00:00:00.000Z",
+      "completedAt": "2024-11-15T00:01:00.000Z"
+    }
+  }
+}

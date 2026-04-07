@@ -1,0 +1,23 @@
+{
+  "description": "Bad request error (RFC 7807)",
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/bad-request",
+      "title": "Bad Request",
+      "status": 400,
+      "detail": "Invalid policy profile: UNKNOWN_PROFILE",
+      "instance": "/v1/transactions"
+    }
+  },
+  "expected_error": {
+    "class": "BadRequestError",
+    "status": 400,
+    "type": "https://api.signdocs.com.br/errors/bad-request",
+    "title": "Bad Request",
+    "detail": "Invalid policy profile: UNKNOWN_PROFILE"
+  }
+}

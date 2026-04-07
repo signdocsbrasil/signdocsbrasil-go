@@ -1,0 +1,21 @@
+{
+  "description": "Health check (no auth required)",
+  "expected_request": {
+    "method": "GET",
+    "path": "/health",
+    "no_auth": true
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "status": "healthy",
+      "version": "1.0.0",
+      "timestamp": "2024-11-15T12:00:00.000Z",
+      "services": {
+        "dynamodb": { "status": "healthy", "latency": 12 },
+        "s3": { "status": "healthy", "latency": 8 },
+        "cognito": { "status": "healthy", "latency": 15 }
+      }
+    }
+  }
+}

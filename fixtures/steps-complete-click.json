@@ -1,0 +1,37 @@
+{
+  "description": "Complete a CLICK_ACCEPT step",
+  "input": {
+    "transactionId": "tx-uuid-001",
+    "stepId": "step-uuid-001",
+    "accepted": true,
+    "textVersion": "v1.0"
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/transactions/tx-uuid-001/steps/step-uuid-001/complete",
+    "body": {
+      "accepted": true,
+      "textVersion": "v1.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "tenantId": "abc123",
+      "transactionId": "tx-uuid-001",
+      "stepId": "step-uuid-001",
+      "type": "CLICK_ACCEPT",
+      "status": "COMPLETED",
+      "order": 1,
+      "attempts": 1,
+      "maxAttempts": 3,
+      "completedAt": "2024-11-15T00:01:00.000Z",
+      "result": {
+        "click": {
+          "accepted": true,
+          "textVersion": "v1.0"
+        }
+      }
+    }
+  }
+}

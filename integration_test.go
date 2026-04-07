@@ -27,7 +27,7 @@ type fixture struct {
 
 func loadFixture(t *testing.T, name string) fixture {
 	t.Helper()
-	data, err := os.ReadFile(filepath.Join("..", "fixtures", name+".json"))
+	data, err := os.ReadFile(filepath.Join("fixtures", name+".json"))
 	if err != nil {
 		t.Fatalf("failed to load fixture %s: %v", name, err)
 	}

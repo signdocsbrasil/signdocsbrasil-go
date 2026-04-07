@@ -1,0 +1,17 @@
+{
+  "description": "Conflict error",
+  "response": {
+    "status": 409,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/conflict",
+      "title": "Conflict",
+      "status": 409,
+      "detail": "Transaction tx-uuid-001 is already finalized"
+    }
+  },
+  "expected_error": {
+    "class": "ConflictError",
+    "status": 409
+  }
+}

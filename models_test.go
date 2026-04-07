@@ -13,7 +13,7 @@ import (
 func fixtureResponseBody(t *testing.T, name string) []byte {
 	t.Helper()
 
-	path := "../fixtures/" + name
+	path := "fixtures/" + name
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("failed to read fixture %s: %v", name, err)
@@ -269,7 +269,7 @@ func TestModel_Evidence(t *testing.T) {
 }
 
 func TestModel_ProblemDetail(t *testing.T) {
-	path := "../fixtures/error-400.json"
+	path := "fixtures/error-400.json"
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("failed to read fixture: %v", err)

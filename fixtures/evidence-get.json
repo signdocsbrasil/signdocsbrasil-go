@@ -1,0 +1,40 @@
+{
+  "description": "Get evidence for a completed transaction",
+  "input": {
+    "transactionId": "tx-uuid-001"
+  },
+  "expected_request": {
+    "method": "GET",
+    "path": "/v1/transactions/tx-uuid-001/evidence"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "tenantId": "abc123",
+      "transactionId": "tx-uuid-001",
+      "evidenceId": "ev-uuid-001",
+      "status": "COMPLETED",
+      "signer": {
+        "name": "João Silva",
+        "cpf": "12345678901",
+        "userExternalId": "user-ext-001"
+      },
+      "steps": [
+        {
+          "type": "CLICK_ACCEPT",
+          "status": "COMPLETED",
+          "completedAt": "2024-11-15T00:01:00.000Z",
+          "result": {
+            "click": { "accepted": true, "textVersion": "v1.0" }
+          }
+        }
+      ],
+      "document": {
+        "hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+        "filename": "contract.pdf"
+      },
+      "createdAt": "2024-11-15T00:00:00.000Z",
+      "completedAt": "2024-11-15T00:01:00.000Z"
+    }
+  }
+}

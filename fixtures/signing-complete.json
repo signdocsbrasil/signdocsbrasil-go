@@ -1,0 +1,34 @@
+{
+  "description": "Complete digital signature",
+  "input": {
+    "transactionId": "tx-uuid-001",
+    "signatureRequestId": "sigreq-uuid-001",
+    "rawSignatureBase64": "MEUCIA...base64signature..."
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/transactions/tx-uuid-001/signing/complete",
+    "body": {
+      "signatureRequestId": "sigreq-uuid-001",
+      "rawSignatureBase64": "MEUCIA...base64signature..."
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "stepId": "step-uuid-sign-001",
+      "status": "COMPLETED",
+      "result": {
+        "digitalSignature": {
+          "certificateSubject": "CN=JOAO SILVA:12345678901, OU=AC EXAMPLE, O=ICP-Brasil",
+          "certificateSerial": "1234567890ABCDEF",
+          "certificateIssuer": "CN=AC EXAMPLE v5, O=ICP-Brasil",
+          "algorithm": "SHA256withRSA",
+          "signedAt": "2024-11-15T12:05:00.000Z",
+          "signedPdfHash": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
+          "signatureFieldName": "SignDocs_1"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "description": "Create a new transaction with CLICK_ONLY policy",
+  "input": {
+    "purpose": "DOCUMENT_SIGNATURE",
+    "policy": {
+      "profile": "CLICK_ONLY"
+    },
+    "signer": {
+      "name": "João Silva",
+      "email": "joao@example.com",
+      "userExternalId": "user-ext-001",
+      "cpf": "12345678901"
+    },
+    "metadata": {
+      "contractId": "CTR-2024-001"
+    }
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/transactions",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {{access_token}}"
+    },
+    "has_header": "X-Idempotency-Key",
+    "body": {
+      "purpose": "DOCUMENT_SIGNATURE",
+      "policy": {
+        "profile": "CLICK_ONLY"
+      },
+      "signer": {
+        "name": "João Silva",
+        "email": "joao@example.com",
+        "userExternalId": "user-ext-001",
+        "cpf": "12345678901"
+      },
+      "metadata": {
+        "contractId": "CTR-2024-001"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json",
+      "RateLimit-Limit": "1000, 10000;window=month",
+      "RateLimit-Remaining": "999, 9999;window=month",
+      "RateLimit-Reset": "1700006400"
+    },
+    "body": {
+      "tenantId": "abc123",
+      "transactionId": "tx-uuid-001",
+      "status": "CREATED",
+      "purpose": "DOCUMENT_SIGNATURE",
+      "policy": {
+        "profile": "CLICK_ONLY"
+      },
+      "signer": {
+        "name": "João Silva",
+        "email": "joao@example.com",
+        "userExternalId": "user-ext-001",
+        "cpf": "12345678901"
+      },
+      "steps": [
+        {
+          "tenantId": "abc123",
+          "transactionId": "tx-uuid-001",
+          "stepId": "step-uuid-001",
+          "type": "CLICK_ACCEPT",
+          "status": "PENDING",
+          "order": 1,
+          "attempts": 0,
+          "maxAttempts": 3
+        }
+      ],
+      "metadata": {
+        "contractId": "CTR-2024-001"
+      },
+      "expiresAt": "2024-11-16T00:00:00.000Z",
+      "createdAt": "2024-11-15T00:00:00.000Z",
+      "updatedAt": "2024-11-15T00:00:00.000Z"
+    }
+  }
+}

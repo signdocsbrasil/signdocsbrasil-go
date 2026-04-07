@@ -1,0 +1,17 @@
+{
+  "description": "Forbidden error - insufficient scope",
+  "response": {
+    "status": 403,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/forbidden",
+      "title": "Forbidden",
+      "status": 403,
+      "detail": "Insufficient scope: requires transactions:write"
+    }
+  },
+  "expected_error": {
+    "class": "ForbiddenError",
+    "status": 403
+  }
+}

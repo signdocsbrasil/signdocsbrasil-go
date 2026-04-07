@@ -1,0 +1,11 @@
+{
+  "description": "Expired webhook timestamp (replay attack prevention)",
+  "input": {
+    "secret": "whsec_test_secret_key_12345",
+    "body": "{\"id\":\"dlv-002\",\"eventType\":\"TRANSACTION.CREATED\",\"tenantId\":\"abc123\",\"timestamp\":\"2024-11-15T12:00:00.000Z\",\"data\":{}}",
+    "timestamp": "1699963200",
+    "signature": "valid_but_expired_hmac"
+  },
+  "notes": "Even if the HMAC is valid, the timestamp is >300s old so verification must return false",
+  "expected_result": false
+}

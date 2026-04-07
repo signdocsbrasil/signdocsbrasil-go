@@ -1,0 +1,17 @@
+{
+  "description": "Unprocessable entity error",
+  "response": {
+    "status": 422,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/unprocessable-entity",
+      "title": "Unprocessable Entity",
+      "status": 422,
+      "detail": "CPF must be exactly 11 digits"
+    }
+  },
+  "expected_error": {
+    "class": "UnprocessableEntityError",
+    "status": 422
+  }
+}

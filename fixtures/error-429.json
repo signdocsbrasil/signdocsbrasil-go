@@ -1,0 +1,21 @@
+{
+  "description": "Rate limit error with Retry-After header",
+  "response": {
+    "status": 429,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "Retry-After": "5"
+    },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/rate-limit",
+      "title": "Too Many Requests",
+      "status": 429,
+      "detail": "Daily transaction quota exceeded"
+    }
+  },
+  "expected_error": {
+    "class": "RateLimitError",
+    "status": 429,
+    "retryAfterSeconds": 5
+  }
+}

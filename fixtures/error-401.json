@@ -1,0 +1,17 @@
+{
+  "description": "Unauthorized error",
+  "response": {
+    "status": 401,
+    "headers": { "Content-Type": "application/problem+json" },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/unauthorized",
+      "title": "Unauthorized",
+      "status": 401,
+      "detail": "Invalid or expired access token"
+    }
+  },
+  "expected_error": {
+    "class": "UnauthorizedError",
+    "status": 401
+  }
+}

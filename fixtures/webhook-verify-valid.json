@@ -1,0 +1,12 @@
+{
+  "description": "Valid webhook signature verification",
+  "input": {
+    "secret": "whsec_test_secret_key_12345",
+    "body": "{\"id\":\"dlv-001\",\"eventType\":\"TRANSACTION.COMPLETED\",\"tenantId\":\"abc123\",\"transactionId\":\"tx-uuid-001\",\"timestamp\":\"2024-11-15T12:00:00.000Z\",\"data\":{\"status\":\"COMPLETED\"}}",
+    "timestamp": "1700049600",
+    "signature": "computed_from_hmac_sha256"
+  },
+  "notes": "Signature = HMAC-SHA256(secret, '{timestamp}.{body}'). Each SDK must compute the expected signature from the secret and verify using constant-time comparison. The 'signature' field above is a placeholder — each test must compute the real HMAC.",
+  "expected_result": true,
+  "tolerance_seconds": 300
+}

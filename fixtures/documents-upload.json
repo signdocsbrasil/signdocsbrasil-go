@@ -1,0 +1,25 @@
+{
+  "description": "Upload document to transaction (inline base64)",
+  "input": {
+    "transactionId": "tx-uuid-001",
+    "content": "JVBERi0xLjQKMSAwIG9iago8PAovVHlwZQ==",
+    "filename": "contract.pdf"
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/transactions/tx-uuid-001/document",
+    "body": {
+      "content": "JVBERi0xLjQKMSAwIG9iago8PAovVHlwZQ==",
+      "filename": "contract.pdf"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "transactionId": "tx-uuid-001",
+      "documentHash": "sha256-abc123def456",
+      "status": "DOCUMENT_UPLOADED",
+      "uploadedAt": "2024-11-15T00:00:30.000Z"
+    }
+  }
+}

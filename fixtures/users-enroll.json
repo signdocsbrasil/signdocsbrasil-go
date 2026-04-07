@@ -1,0 +1,30 @@
+{
+  "description": "Enroll a user with reference biometric image",
+  "input": {
+    "userExternalId": "user-ext-001",
+    "referenceImage": {
+      "source": "BASE64_IMAGE",
+      "data": "/9j/4AAQSkZJRg..."
+    },
+    "name": "João Silva"
+  },
+  "expected_request": {
+    "method": "PUT",
+    "path": "/v1/users/user-ext-001/enrollment",
+    "body": {
+      "referenceImage": {
+        "source": "BASE64_IMAGE",
+        "data": "/9j/4AAQSkZJRg..."
+      },
+      "name": "João Silva"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "userExternalId": "user-ext-001",
+      "enrolled": true,
+      "enrolledAt": "2024-11-15T00:00:00.000Z"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "description": "OAuth2 token acquisition via private_key_jwt (ES256)",
+  "input": {
+    "clientId": "tenant_abc123_cid001",
+    "kid": "key-001",
+    "scopes": ["transactions:read", "transactions:write", "steps:write"]
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/oauth2/token",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body_contains": {
+      "grant_type": "client_credentials",
+      "client_id": "tenant_abc123_cid001",
+      "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+      "scope": "transactions:read transactions:write steps:write"
+    },
+    "jwt_assertion_claims": {
+      "iss": "tenant_abc123_cid001",
+      "sub": "tenant_abc123_cid001",
+      "aud_suffix": "/oauth2/token",
+      "exp_offset_seconds": 300
+    },
+    "jwt_assertion_header": {
+      "alg": "ES256",
+      "typ": "JWT",
+      "kid": "key-001"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "access_token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZW5hbnRfYWJjMTIzX2NpZDAwMSIsInNjb3BlcyI6WyJ0cmFuc2FjdGlvbnM6cmVhZCIsInRyYW5zYWN0aW9uczp3cml0ZSIsInN0ZXBzOndyaXRlIl19.fake",
+      "token_type": "Bearer",
+      "expires_in": 900,
+      "scope": "transactions:read transactions:write steps:write"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "description": "List transactions with pagination",
+  "input": {
+    "status": "COMPLETED",
+    "limit": 2
+  },
+  "expected_request": {
+    "method": "GET",
+    "path": "/v1/transactions",
+    "query": {
+      "status": "COMPLETED",
+      "limit": "2"
+    },
+    "headers": {
+      "Authorization": "Bearer {{access_token}}"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "transactions": [
+        {
+          "tenantId": "abc123",
+          "transactionId": "tx-uuid-002",
+          "status": "COMPLETED",
+          "purpose": "DOCUMENT_SIGNATURE",
+          "policy": { "profile": "CLICK_ONLY" },
+          "signer": {
+            "name": "Maria Santos",
+            "email": "maria@example.com",
+            "userExternalId": "user-ext-002"
+          },
+          "steps": [],
+          "expiresAt": "2024-11-17T00:00:00.000Z",
+          "createdAt": "2024-11-14T10:00:00.000Z",
+          "updatedAt": "2024-11-14T10:05:00.000Z"
+        },
+        {
+          "tenantId": "abc123",
+          "transactionId": "tx-uuid-003",
+          "status": "COMPLETED",
+          "purpose": "DOCUMENT_SIGNATURE",
+          "policy": { "profile": "BIOMETRIC" },
+          "signer": {
+            "name": "Pedro Costa",
+            "email": "pedro@example.com",
+            "userExternalId": "user-ext-003"
+          },
+          "steps": [],
+          "expiresAt": "2024-11-18T00:00:00.000Z",
+          "createdAt": "2024-11-14T11:00:00.000Z",
+          "updatedAt": "2024-11-14T11:30:00.000Z"
+        }
+      ],
+      "nextToken": "eyJQSyI6IlRFTkFOVCNhYmMxMjMiLCJTSyI6IlRYI3R4LXV1aWQtMDAzIn0=",
+      "count": 2
+    }
+  }
+}

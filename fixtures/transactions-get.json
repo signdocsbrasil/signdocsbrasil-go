@@ -1,0 +1,58 @@
+{
+  "description": "Get a single transaction by ID",
+  "input": {
+    "transactionId": "tx-uuid-001"
+  },
+  "expected_request": {
+    "method": "GET",
+    "path": "/v1/transactions/tx-uuid-001",
+    "headers": {
+      "Authorization": "Bearer {{access_token}}"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "tenantId": "abc123",
+      "transactionId": "tx-uuid-001",
+      "status": "IN_PROGRESS",
+      "purpose": "DOCUMENT_SIGNATURE",
+      "policy": { "profile": "CLICK_PLUS_OTP" },
+      "signer": {
+        "name": "João Silva",
+        "email": "joao@example.com",
+        "userExternalId": "user-ext-001",
+        "cpf": "12345678901"
+      },
+      "steps": [
+        {
+          "tenantId": "abc123",
+          "transactionId": "tx-uuid-001",
+          "stepId": "step-uuid-001",
+          "type": "CLICK_ACCEPT",
+          "status": "COMPLETED",
+          "order": 1,
+          "attempts": 1,
+          "maxAttempts": 3,
+          "completedAt": "2024-11-15T00:01:00.000Z",
+          "result": {
+            "click": { "accepted": true, "textVersion": "v1.0" }
+          }
+        },
+        {
+          "tenantId": "abc123",
+          "transactionId": "tx-uuid-001",
+          "stepId": "step-uuid-002",
+          "type": "OTP_CHALLENGE",
+          "status": "PENDING",
+          "order": 2,
+          "attempts": 0,
+          "maxAttempts": 3
+        }
+      ],
+      "expiresAt": "2024-11-16T00:00:00.000Z",
+      "createdAt": "2024-11-15T00:00:00.000Z",
+      "updatedAt": "2024-11-15T00:01:00.000Z"
+    }
+  }
+}

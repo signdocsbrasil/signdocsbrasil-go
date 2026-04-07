@@ -1,0 +1,14 @@
+{
+  "description": "Delete a webhook (returns 204 No Content)",
+  "input": {
+    "webhookId": "wh-uuid-001"
+  },
+  "expected_request": {
+    "method": "DELETE",
+    "path": "/v1/webhooks/wh-uuid-001"
+  },
+  "response": {
+    "status": 204,
+    "body": null
+  }
+}

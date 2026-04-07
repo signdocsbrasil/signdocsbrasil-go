@@ -1,0 +1,26 @@
+{
+  "description": "Register a webhook (returns 201 with secret)",
+  "input": {
+    "url": "https://example.com/webhooks/signdocs",
+    "events": ["TRANSACTION.COMPLETED", "TRANSACTION.FAILED"]
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/webhooks",
+    "body": {
+      "url": "https://example.com/webhooks/signdocs",
+      "events": ["TRANSACTION.COMPLETED", "TRANSACTION.FAILED"]
+    }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "webhookId": "wh-uuid-001",
+      "url": "https://example.com/webhooks/signdocs",
+      "secret": "whsec_generated_secret_abc123",
+      "events": ["TRANSACTION.COMPLETED", "TRANSACTION.FAILED"],
+      "status": "ACTIVE",
+      "createdAt": "2024-11-15T00:00:00.000Z"
+    }
+  }
+}
