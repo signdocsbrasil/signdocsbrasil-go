@@ -1,0 +1,3 @@
+# Exclude from git archive / release tarballs
+*_test.go        export-ignore
+.gitattributes   export-ignore
