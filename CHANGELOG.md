@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-14
+
+### Added
+
+- `VerificationService.VerifyEnvelope(ctx, envelopeID)` — public method for the new `GET /v1/verify/envelope/{envelopeId}` endpoint. Returns envelope status, signers list (each with `EvidenceID` for drill-down via `Verify()`), and consolidated download URLs.
+- `EnvelopeVerificationResponse`, `EnvelopeVerificationSigner`, and `EnvelopeVerificationDownloads` types. For non-PDF envelopes signed with digital certificates, `Downloads.ConsolidatedSignature` exposes a single PKCS#7 / CMS detached `.p7s` containing every signer's `SignerInfo`. For PDF envelopes, `Downloads.CombinedSignedPDF` exposes the merged PDF.
+- `VerificationSigner.CPFCNPJ` and `VerificationResponse.TenantCNPJ` fields (previously returned by the API but not typed by the SDK).
+- `VerificationDownloads.OriginalDocument` and `SignedSignature` fields (previously undocumented), matching the real shape the API returns.
+
+### Changed
+
+- `VerificationDownloads.SignedSignature` is now `nil` when the evidence belongs to a multi-signer envelope (the API omits the field). For standalone signing sessions (single-signer non-PDF with digital certificate) the field is still populated. To retrieve the consolidated `.p7s` for an envelope, use `VerificationService.VerifyEnvelope()` instead.
+
+### Removed
+
+- `VerificationDownloads.SignedPDF` — the field was typed by the SDK but never actually returned by the API. No real-world consumer could have depended on it.
+
 ## [1.1.0] - 2026-03-27
 
 ### Added
