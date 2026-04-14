@@ -562,6 +562,7 @@ type Evidence struct {
 // VerificationSigner contains the signer info within a verification response.
 type VerificationSigner struct {
 	DisplayName string `json:"displayName,omitempty"`
+	CPFCNPJ     string `json:"cpfCnpj,omitempty"`
 }
 
 // VerificationStep represents a single step within a verification response.
@@ -574,18 +575,19 @@ type VerificationStep struct {
 
 // VerificationResponse is returned when verifying evidence.
 type VerificationResponse struct {
-	EvidenceID    string               `json:"evidenceId"`
-	Status        string               `json:"status"`
-	TransactionID string               `json:"transactionId"`
-	Purpose       string               `json:"purpose"`
-	DocumentHash  string               `json:"documentHash,omitempty"`
-	EvidenceHash  string               `json:"evidenceHash"`
-	Policy        *Policy              `json:"policy"`
-	Steps         []VerificationStep   `json:"steps"`
-	Signer        *VerificationSigner  `json:"signer,omitempty"`
-	TenantName    string               `json:"tenantName,omitempty"`
-	CreatedAt     string               `json:"createdAt"`
-	CompletedAt   string               `json:"completedAt"`
+	EvidenceID    string              `json:"evidenceId"`
+	Status        string              `json:"status"`
+	TransactionID string              `json:"transactionId"`
+	Purpose       string              `json:"purpose"`
+	DocumentHash  string              `json:"documentHash,omitempty"`
+	EvidenceHash  string              `json:"evidenceHash"`
+	Policy        *Policy             `json:"policy"`
+	Steps         []VerificationStep  `json:"steps"`
+	Signer        *VerificationSigner `json:"signer,omitempty"`
+	TenantName    string              `json:"tenantName,omitempty"`
+	TenantCNPJ    string              `json:"tenantCnpj,omitempty"`
+	CreatedAt     string              `json:"createdAt"`
+	CompletedAt   string              `json:"completedAt"`
 }
 
 // DownloadArtifact represents a single downloadable artifact.
@@ -595,16 +597,63 @@ type DownloadArtifact struct {
 }
 
 // VerificationDownloads contains the available download artifacts.
+//
+// SignedSignature is the detached PKCS#7 / CMS (.p7s) for digital-cert
+// signing of non-PDF documents. It is only populated by the API for
+// standalone signing sessions (single-signer); it is omitted entirely
+// from the response when the evidence belongs to a multi-signer
+// envelope — use VerificationService.VerifyEnvelope to retrieve the
+// consolidated envelope-level .p7s instead.
 type VerificationDownloads struct {
-	EvidencePack *DownloadArtifact `json:"evidencePack,omitempty"`
-	SignedPDF    *DownloadArtifact `json:"signedPdf,omitempty"`
-	FinalPDF     *DownloadArtifact `json:"finalPdf,omitempty"`
+	OriginalDocument *DownloadArtifact `json:"originalDocument"`
+	EvidencePack     *DownloadArtifact `json:"evidencePack"`
+	FinalPDF         *DownloadArtifact `json:"finalPdf"`
+	SignedSignature  *DownloadArtifact `json:"signedSignature,omitempty"`
 }
 
 // VerificationDownloadsResponse contains download URLs for evidence artifacts.
 type VerificationDownloadsResponse struct {
 	EvidenceID string                `json:"evidenceId"`
 	Downloads  VerificationDownloads `json:"downloads"`
+}
+
+// EnvelopeVerificationSigner is a per-signer entry within an envelope
+// verification response.
+type EnvelopeVerificationSigner struct {
+	SignerIndex   int    `json:"signerIndex"`
+	DisplayName   string `json:"displayName"`
+	CPFCNPJ       string `json:"cpfCnpj,omitempty"`
+	Status        string `json:"status"`
+	PolicyProfile string `json:"policyProfile,omitempty"`
+	EvidenceID    string `json:"evidenceId,omitempty"`
+	CompletedAt   string `json:"completedAt,omitempty"`
+}
+
+// EnvelopeVerificationDownloads contains envelope-level consolidated downloads.
+//
+// CombinedSignedPDF is present only for PDF envelopes; ConsolidatedSignature
+// is the merged .p7s containing every signer's SignerInfo for non-PDF
+// envelopes signed with digital certificates.
+type EnvelopeVerificationDownloads struct {
+	CombinedSignedPDF     *DownloadArtifact `json:"combinedSignedPdf,omitempty"`
+	ConsolidatedSignature *DownloadArtifact `json:"consolidatedSignature,omitempty"`
+}
+
+// EnvelopeVerificationResponse is returned when verifying a multi-signer
+// envelope via GET /v1/verify/envelope/{envelopeId}.
+type EnvelopeVerificationResponse struct {
+	EnvelopeID        string                         `json:"envelopeId"`
+	Status            string                         `json:"status"`
+	SigningMode       string                         `json:"signingMode"`
+	TotalSigners      int                            `json:"totalSigners"`
+	CompletedSessions int                            `json:"completedSessions"`
+	DocumentHash      string                         `json:"documentHash"`
+	TenantName        string                         `json:"tenantName,omitempty"`
+	TenantCNPJ        string                         `json:"tenantCnpj,omitempty"`
+	Signers           []EnvelopeVerificationSigner   `json:"signers"`
+	Downloads         *EnvelopeVerificationDownloads `json:"downloads,omitempty"`
+	CreatedAt         string                         `json:"createdAt"`
+	CompletedAt       string                         `json:"completedAt,omitempty"`
 }
 
 // EnrollUserRequest is the request body for enrolling a user's biometric data.

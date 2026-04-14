@@ -273,7 +273,15 @@ func TestVerification_DownloadsNoAuth(t *testing.T) {
 				t.Error("expected no Authorization for verification downloads")
 			}
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"files":[]}`))
+			w.Write([]byte(`{
+				"evidenceId": "ev_1",
+				"downloads": {
+					"originalDocument": null,
+					"evidencePack": {"url": "https://example.com/pack.p7m", "filename": "pack.p7m"},
+					"finalPdf": null,
+					"signedSignature": {"url": "https://example.com/signature.p7s", "filename": "signature.p7s"}
+				}
+			}`))
 			return
 		}
 		w.WriteHeader(404)
@@ -281,8 +289,82 @@ func TestVerification_DownloadsNoAuth(t *testing.T) {
 	defer server.Close()
 
 	svc := newVerificationService(hc)
-	_, err := svc.Downloads(context.Background(), "ev_1")
+	resp, err := svc.Downloads(context.Background(), "ev_1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Downloads.EvidencePack == nil || resp.Downloads.EvidencePack.Filename != "pack.p7m" {
+		t.Errorf("expected evidencePack pack.p7m, got %+v", resp.Downloads.EvidencePack)
+	}
+	if resp.Downloads.SignedSignature == nil || resp.Downloads.SignedSignature.Filename != "signature.p7s" {
+		t.Errorf("expected signedSignature signature.p7s, got %+v", resp.Downloads.SignedSignature)
+	}
+	if resp.Downloads.OriginalDocument != nil {
+		t.Errorf("expected originalDocument nil, got %+v", resp.Downloads.OriginalDocument)
+	}
+}
+
+func TestVerification_VerifyEnvelopeNoAuth(t *testing.T) {
+	server, hc := setupResourceTest(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v1/verify/envelope/env_1" && r.Method == "GET" {
+			if r.Header.Get("Authorization") != "" {
+				t.Error("expected no Authorization for envelope verification")
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{
+				"envelopeId": "env_1",
+				"status": "COMPLETED",
+				"signingMode": "SEQUENTIAL",
+				"totalSigners": 2,
+				"completedSessions": 2,
+				"documentHash": "sha256:abc",
+				"tenantName": "Acme",
+				"tenantCnpj": "12345678000100",
+				"signers": [
+					{
+						"signerIndex": 1,
+						"displayName": "João Silva",
+						"cpfCnpj": "12345678901",
+						"status": "COMPLETED",
+						"evidenceId": "ev_a",
+						"completedAt": "2026-04-13T18:00:00Z"
+					},
+					{
+						"signerIndex": 2,
+						"displayName": "Maria Souza",
+						"status": "COMPLETED",
+						"evidenceId": "ev_b",
+						"completedAt": "2026-04-13T18:30:00Z"
+					}
+				],
+				"downloads": {
+					"consolidatedSignature": {"url": "https://example.com/envelope.p7s", "filename": "signature.p7s"}
+				},
+				"createdAt": "2026-04-13T17:00:00Z",
+				"completedAt": "2026-04-13T18:30:00Z"
+			}`))
+			return
+		}
+		w.WriteHeader(404)
+	})
+	defer server.Close()
+
+	svc := newVerificationService(hc)
+	resp, err := svc.VerifyEnvelope(context.Background(), "env_1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.EnvelopeID != "env_1" || resp.SigningMode != "SEQUENTIAL" {
+		t.Errorf("unexpected envelope: %+v", resp)
+	}
+	if len(resp.Signers) != 2 || resp.Signers[0].DisplayName != "João Silva" {
+		t.Errorf("unexpected signers: %+v", resp.Signers)
+	}
+	if resp.Downloads == nil || resp.Downloads.ConsolidatedSignature == nil ||
+		resp.Downloads.ConsolidatedSignature.Filename != "signature.p7s" {
+		t.Errorf("unexpected downloads: %+v", resp.Downloads)
+	}
+	if resp.Downloads.CombinedSignedPDF != nil {
+		t.Errorf("expected combinedSignedPdf nil, got %+v", resp.Downloads.CombinedSignedPDF)
 	}
 }
