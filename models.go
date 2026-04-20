@@ -68,24 +68,62 @@ const (
 	CaptureModeHostedPage CaptureMode = "HOSTED_PAGE"
 )
 
-// WebhookEventType represents types of webhook events.
+// WebhookEventType represents types of webhook events. The canonical
+// set of events is defined by the OpenAPI spec `WebhookEventType` enum
+// at `openapi/openapi.yaml`; the SDK stays in lockstep. Events tagged
+// NT65 are only emitted for tenants with `nt65ComplianceEnabled` (INSS
+// consignado flow) — use IsNT65Event to check.
 type WebhookEventType string
 
 const (
-	WebhookEventTransactionCreated   WebhookEventType = "TRANSACTION.CREATED"
-	WebhookEventTransactionCompleted WebhookEventType = "TRANSACTION.COMPLETED"
-	WebhookEventTransactionCancelled WebhookEventType = "TRANSACTION.CANCELLED"
-	WebhookEventTransactionFailed    WebhookEventType = "TRANSACTION.FAILED"
-	WebhookEventTransactionExpired   WebhookEventType = "TRANSACTION.EXPIRED"
-	WebhookEventTransactionFallback  WebhookEventType = "TRANSACTION.FALLBACK"
-	WebhookEventStepStarted         WebhookEventType = "STEP.STARTED"
-	WebhookEventStepCompleted       WebhookEventType = "STEP.COMPLETED"
-	WebhookEventStepFailed          WebhookEventType = "STEP.FAILED"
-	WebhookEventQuotaWarning              WebhookEventType = "QUOTA.WARNING"
-	WebhookEventAPIDeprecation            WebhookEventType = "API.DEPRECATION_NOTICE"
-	WebhookEventStepPurposeDisclosure     WebhookEventType = "STEP.PURPOSE_DISCLOSURE_SENT"
-	WebhookEventTransactionDeadline       WebhookEventType = "TRANSACTION.DEADLINE_APPROACHING"
+	// Transaction events
+	WebhookEventTransactionCreated             WebhookEventType = "TRANSACTION.CREATED"
+	WebhookEventTransactionCompleted           WebhookEventType = "TRANSACTION.COMPLETED"
+	WebhookEventTransactionCancelled           WebhookEventType = "TRANSACTION.CANCELLED"
+	WebhookEventTransactionFailed              WebhookEventType = "TRANSACTION.FAILED"
+	WebhookEventTransactionExpired             WebhookEventType = "TRANSACTION.EXPIRED"
+	WebhookEventTransactionFallback            WebhookEventType = "TRANSACTION.FALLBACK"
+	WebhookEventTransactionDeadlineApproaching WebhookEventType = "TRANSACTION.DEADLINE_APPROACHING"
+
+	// Step events
+	WebhookEventStepStarted               WebhookEventType = "STEP.STARTED"
+	WebhookEventStepCompleted             WebhookEventType = "STEP.COMPLETED"
+	WebhookEventStepFailed                WebhookEventType = "STEP.FAILED"
+	WebhookEventStepPurposeDisclosureSent WebhookEventType = "STEP.PURPOSE_DISCLOSURE_SENT"
+
+	// Tenant-level events
+	WebhookEventQuotaWarning   WebhookEventType = "QUOTA.WARNING"
+	WebhookEventAPIDeprecation WebhookEventType = "API.DEPRECATION_NOTICE"
+
+	// Signing session events (added in 1.3.0 — new in OpenAPI R0.1)
+	WebhookEventSigningSessionCreated   WebhookEventType = "SIGNING_SESSION.CREATED"
+	WebhookEventSigningSessionCompleted WebhookEventType = "SIGNING_SESSION.COMPLETED"
+	WebhookEventSigningSessionCancelled WebhookEventType = "SIGNING_SESSION.CANCELLED"
+	WebhookEventSigningSessionExpired   WebhookEventType = "SIGNING_SESSION.EXPIRED"
+
+	// Deprecated aliases. The original 1.2.x constants used truncated
+	// names for the two NT65 events; keep them pointing at the same
+	// underlying strings so existing consumer code continues to
+	// compile. Prefer the full names above for new code.
+	//
+	// Deprecated: Use WebhookEventStepPurposeDisclosureSent.
+	WebhookEventStepPurposeDisclosure = WebhookEventStepPurposeDisclosureSent
+	// Deprecated: Use WebhookEventTransactionDeadlineApproaching.
+	WebhookEventTransactionDeadline = WebhookEventTransactionDeadlineApproaching
 )
+
+// IsNT65Event reports whether the event is part of the NT65 INSS
+// consignado flow and is only emitted for tenants with
+// `nt65ComplianceEnabled`. See docs/18-nt65-consignado.md.
+func IsNT65Event(e WebhookEventType) bool {
+	switch e {
+	case WebhookEventTransactionDeadlineApproaching,
+		WebhookEventStepPurposeDisclosureSent:
+		return true
+	default:
+		return false
+	}
+}
 
 // OtpChannel represents the channel for OTP delivery.
 type OtpChannel string

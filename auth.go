@@ -18,23 +18,38 @@ import (
 	"time"
 )
 
-// authHandler manages OAuth2 token acquisition and caching.
+// authHandler manages OAuth2 token acquisition. Tokens are persisted
+// via a pluggable TokenCache (see WithTokenCache). The in-memory
+// default matches the pre-1.3 behavior.
+//
+// The type is unexported: callers configure it exclusively through
+// functional options on NewClient. Renaming to AuthHandler would be a
+// breaking API change with zero win — there's no value returned to the
+// caller that exposes the type.
 type authHandler struct {
 	clientID     string
 	clientSecret string
 	privateKey   *ecdsa.PrivateKey
 	kid          string
 	tokenURL     string
+	baseURL      string
 	scopes       []string
 	httpClient   *http.Client
 
-	mu          sync.Mutex
-	cachedToken *cachedToken
-}
+	cache    TokenCache
+	cacheKey string
 
-type cachedToken struct {
-	accessToken string
-	expiresAt   time.Time
+	// mu serializes token *fetches* so that a burst of concurrent
+	// callers on a cold cache results in a single token request, not
+	// N parallel requests. The cache itself is independently
+	// concurrency-safe.
+	mu sync.Mutex
+
+	// initMu guards the lazy cache/cacheKey initialization path used
+	// by tests that build authHandler literals directly. It is
+	// deliberately separate from mu so the fetch path can call
+	// ensureCache without risking a self-deadlock.
+	initMu sync.Mutex
 }
 
 type tokenResponse struct {
@@ -45,28 +60,87 @@ type tokenResponse struct {
 }
 
 func newAuthHandler(cfg *Config) *authHandler {
+	cache := cfg.TokenCache
+	if cache == nil {
+		cache = NewInMemoryTokenCache()
+	}
 	return &authHandler{
 		clientID:     cfg.ClientID,
 		clientSecret: cfg.ClientSecret,
 		privateKey:   cfg.PrivateKey,
 		kid:          cfg.Kid,
 		tokenURL:     cfg.BaseURL + "/oauth2/token",
+		baseURL:      cfg.BaseURL,
 		scopes:       cfg.Scopes,
 		httpClient:   cfg.HTTPClient,
+		cache:        cache,
+		cacheKey:     DeriveCacheKey(cfg.ClientID, cfg.BaseURL, cfg.Scopes),
 	}
 }
 
 // getAccessToken returns a valid access token, refreshing if necessary.
-// It is safe for concurrent use.
+// It is safe for concurrent use; the fetch path is serialized so that a
+// cold cache results in a single upstream token request even under
+// bursty concurrency.
 func (a *authHandler) getAccessToken() (string, error) {
+	// Defensive: tests (and a few old internal call sites) may
+	// construct an authHandler literal without going through
+	// newAuthHandler. Lazily install the default cache in that case
+	// rather than nil-panicking.
+	a.ensureCache()
+
+	// Fast-path: check cache without holding the fetch mutex. This
+	// lets hot-path callers skip any contention once the cache is warm.
+	if cached, ok := a.cache.Get(a.cacheKey); ok {
+		if time.Now().Before(cached.ExpiresAt.Add(-30 * time.Second)) {
+			return cached.AccessToken, nil
+		}
+	}
+
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	if a.cachedToken != nil && time.Now().Before(a.cachedToken.expiresAt.Add(-30*time.Second)) {
-		return a.cachedToken.accessToken, nil
+	// Recheck inside the lock: another goroutine may have already
+	// fetched a fresh token while we were waiting on mu.
+	if cached, ok := a.cache.Get(a.cacheKey); ok {
+		if time.Now().Before(cached.ExpiresAt.Add(-30 * time.Second)) {
+			return cached.AccessToken, nil
+		}
 	}
 
 	return a.fetchToken()
+}
+
+// invalidate removes the cached token so the next getAccessToken call
+// forces a fresh fetch. Useful when the server returns 401 on a token
+// the SDK still thought was valid.
+func (a *authHandler) invalidate() {
+	a.ensureCache()
+	a.cache.Delete(a.cacheKey)
+}
+
+// ensureCache installs the default in-memory cache on demand. This is
+// a lazy fallback for callers that build authHandler literals directly
+// (primarily tests). newAuthHandler always populates the cache eagerly.
+//
+// Uses a dedicated mutex so callers can invoke it without worrying
+// about whether a.mu is already held on the fetch path.
+func (a *authHandler) ensureCache() {
+	a.initMu.Lock()
+	defer a.initMu.Unlock()
+	if a.cache == nil {
+		a.cache = NewInMemoryTokenCache()
+	}
+	if a.cacheKey == "" {
+		baseURL := a.baseURL
+		if baseURL == "" {
+			// Best-effort reconstruction: strip the /oauth2/token
+			// suffix from tokenURL so cache keys are stable across
+			// restarts.
+			baseURL = strings.TrimSuffix(a.tokenURL, "/oauth2/token")
+		}
+		a.cacheKey = DeriveCacheKey(a.clientID, baseURL, a.scopes)
+	}
 }
 
 func (a *authHandler) fetchToken() (string, error) {
@@ -114,10 +188,10 @@ func (a *authHandler) fetchToken() (string, error) {
 		return "", &AuthenticationError{Message: "failed to parse token response", Err: err}
 	}
 
-	a.cachedToken = &cachedToken{
-		accessToken: tokenResp.AccessToken,
-		expiresAt:   time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second),
-	}
+	a.cache.Set(a.cacheKey, &CachedToken{
+		AccessToken: tokenResp.AccessToken,
+		ExpiresAt:   time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second),
+	})
 
 	return tokenResp.AccessToken, nil
 }

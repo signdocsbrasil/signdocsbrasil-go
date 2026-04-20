@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-04-20
+
+### Added
+
+- `TokenCache` interface — pluggable OAuth token cache. Inject via the `WithTokenCache` functional option to share tokens across stateless workers (serverless, CLI). Default `NewInMemoryTokenCache()` preserves pre-1.3 single-process behavior.
+- `CachedToken` struct and `NewInMemoryTokenCache()` constructor (thread-safe via `sync.Mutex`).
+- `DeriveCacheKey(clientID, baseURL, scopes)` exported helper for custom cache implementations. Returns `signdocs.oauth.<32-hex>` SHA-256 derivative of canonical material (sorted scopes, trimmed trailing slash). Keys never leak the raw client ID.
+- `ResponseMetadata` struct — captures `RateLimit-*`, `Deprecation`, `Sunset`, and `X-Request-Id` / `X-SignDocs-Request-Id` headers from every API response. `IsDeprecated()` helper. RFC 8594 parser accepts both `@<unix-seconds>` and IMF-fixdate forms.
+- `WithOnResponse(fn func(*ResponseMetadata))` functional option — registers a response observer. Fires after every HTTP response (including errors). Panics in the callback are recovered and logged; they never reach the request path.
+- `IsNT65Event(WebhookEventType) bool` exported predicate for identifying NT65 consignado events.
+
+### Changed
+
+- `authHandler` now reads and writes tokens through the configured `TokenCache`. Refresh is still serialized via `sync.Mutex` so a cold cache + bursty concurrency results in a single upstream token fetch.
+- `authHandler.invalidate()` now deletes the cache entry instead of clearing internal fields.
+- SDK now officially aligned with OpenAPI spec `WebhookEventType` enum at 17 events. Go was already ahead on `STEP.PURPOSE_DISCLOSURE_SENT` and `TRANSACTION.DEADLINE_APPROACHING` prior to 1.3.0; as of spec v1.1.0 these are part of the canonical set.
+- User-Agent bumped to `1.3.0`.
+
 ## [1.2.0] - 2026-04-14
 
 ### Added

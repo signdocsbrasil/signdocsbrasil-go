@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -14,7 +15,8 @@ import (
 	"time"
 )
 
-const sdkVersion = "1.0.0"
+// sdkVersion is reported in the User-Agent header.
+const sdkVersion = "1.3.0"
 
 // httpClient is the internal HTTP client used by all service methods.
 type httpClient struct {
@@ -23,6 +25,7 @@ type httpClient struct {
 	auth       *authHandler
 	client     *http.Client
 	logger     *slog.Logger
+	onResponse func(*ResponseMetadata)
 }
 
 type requestOptions struct {
@@ -41,7 +44,34 @@ func newHTTPClient(cfg *Config, auth *authHandler) *httpClient {
 		auth:       auth,
 		client:     cfg.HTTPClient,
 		logger:     cfg.Logger,
+		onResponse: cfg.OnResponse,
 	}
+}
+
+// fireOnResponse invokes the configured observer, if any, wrapped in
+// a panic-recovery boundary so that a panic inside user code cannot
+// bubble into the request path. A recovered panic is logged via the
+// configured slog.Logger, or the stdlib log package as a fallback.
+func (h *httpClient) fireOnResponse(meta *ResponseMetadata) {
+	if h.onResponse == nil {
+		return
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			if h.logger != nil {
+				h.logger.Warn("onResponse callback panicked",
+					"panic", fmt.Sprint(r),
+					"method", meta.Method,
+					"path", meta.Path,
+					"status", meta.StatusCode,
+				)
+			} else {
+				log.Printf("signdocsbrasil: onResponse callback panicked: %v (method=%s path=%s status=%d)",
+					r, meta.Method, meta.Path, meta.StatusCode)
+			}
+		}
+	}()
+	h.onResponse(meta)
 }
 
 // request performs an HTTP request with authentication, retry, and error handling.
@@ -112,6 +142,12 @@ func (h *httpClient) request(ctx context.Context, opts requestOptions, result an
 		return err
 	}
 	defer resp.Body.Close()
+
+	// Fire the onResponse observer with the final response (after any
+	// retry loop has converged). Retried responses are intentionally
+	// not surfaced — consumers want the outcome, not the intermediate
+	// 503s the retry layer already handled.
+	h.fireOnResponse(ResponseMetadataFromResponse(resp, opts.Method, opts.Path))
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

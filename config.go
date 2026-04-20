@@ -35,6 +35,19 @@ type Config struct {
 	Scopes       []string
 	HTTPClient   *http.Client
 	Logger       *slog.Logger
+
+	// TokenCache persists OAuth tokens across requests. If nil, the
+	// SDK installs an in-process NewInMemoryTokenCache. Inject a
+	// shared-store implementation (Redis, Memcache, etc.) to share
+	// tokens across stateless workers. See WithTokenCache.
+	TokenCache TokenCache
+
+	// OnResponse, when non-nil, is invoked after every completed
+	// HTTP response with response-level observability metadata
+	// (rate-limit counters, RFC 8594 deprecation headers, request
+	// ID). Panics inside the callback are recovered and logged; they
+	// never propagate to the request path. See WithOnResponse.
+	OnResponse func(*ResponseMetadata)
 }
 
 // Option is a functional option for configuring the Client.
@@ -96,6 +109,37 @@ func WithHTTPClient(client *http.Client) Option {
 func WithLogger(logger *slog.Logger) Option {
 	return func(c *Config) {
 		c.Logger = logger
+	}
+}
+
+// WithTokenCache injects a custom TokenCache, replacing the default
+// in-process InMemoryTokenCache. Stateless hosts (serverless, CLI
+// tools) should use this to share OAuth tokens across workers and
+// avoid a token fetch on every cold start.
+//
+// If c is nil, the default in-memory cache is retained.
+func WithTokenCache(c TokenCache) Option {
+	return func(cfg *Config) {
+		if c != nil {
+			cfg.TokenCache = c
+		}
+	}
+}
+
+// WithOnResponse registers fn as a response observer. fn is invoked
+// after every completed HTTP response (including error responses) with
+// the parsed ResponseMetadata. The SDK recovers from panics in fn and
+// logs them via the configured Logger (or the default stdlib log if no
+// Logger is set) — a misbehaving callback never takes down the request
+// path.
+//
+// Typical uses: push rate-limit counters into metrics, surface
+// Deprecation/Sunset warnings, correlate request IDs to local traces.
+//
+// If fn is nil, any previously installed observer is cleared.
+func WithOnResponse(fn func(*ResponseMetadata)) Option {
+	return func(cfg *Config) {
+		cfg.OnResponse = fn
 	}
 }
 
