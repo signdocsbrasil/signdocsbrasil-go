@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] - 2026-04-20
 
+### Fixed
+
+- `WebhooksService.List` now correctly returns `[]Webhook`. Previously `json.Unmarshal` of `{"webhooks":[...],"count":N}` into `[]Webhook` failed with "cannot unmarshal object into Go value of type []Webhook". The method now decodes via an envelope shape with a bare-array fallback for test fixtures.
+
 ### Added
 
 - `TokenCache` interface — pluggable OAuth token cache. Inject via the `WithTokenCache` functional option to share tokens across stateless workers (serverless, CLI). Default `NewInMemoryTokenCache()` preserves pre-1.3 single-process behavior.
