@@ -1,5 +1,21 @@
 package signdocsbrasil
 
+// Owner identifies the requester creating a signing session or envelope,
+// distinct from the signer(s). When provided, SignDocs automatically:
+//
+//  1. Emails each signer an invitation with their signing URL — when
+//     signer.Email differs from Owner.Email (case-insensitive).
+//  2. Emails the owner a completion notification per signer completion
+//     (and a final "all signed" message for envelopes).
+//
+// Leave nil to keep the traditional behavior: the caller delivers
+// signing URLs via their own channels and uses webhooks for completion
+// state.
+type Owner struct {
+	Email string `json:"email,omitempty"`
+	Name  string `json:"name,omitempty"`
+}
+
 // CreateSigningSessionRequest represents a request to create a signing session.
 type CreateSigningSessionRequest struct {
 	Purpose          string                    `json:"purpose"`
@@ -13,6 +29,8 @@ type CreateSigningSessionRequest struct {
 	Locale           string                    `json:"locale,omitempty"`
 	ExpiresInMinutes int                       `json:"expiresInMinutes,omitempty"`
 	Appearance       *SigningSessionAppearance `json:"appearance,omitempty"`
+	// See Owner for behavior when set.
+	Owner *Owner `json:"owner,omitempty"`
 }
 
 // DocumentRequest represents an inline document.
@@ -43,6 +61,10 @@ type SigningSession struct {
 	ClientSecret  string `json:"clientSecret"`
 	ExpiresAt     string `json:"expiresAt"`
 	CreatedAt     string `json:"createdAt"`
+	// InviteSent is true when SignDocs dispatched an invitation email to
+	// Signer.Email at session creation. Populated only when Owner was
+	// provided and Signer.Email differs from Owner.Email.
+	InviteSent bool `json:"inviteSent,omitempty"`
 }
 
 // SigningSessionStatus is the lightweight status used for polling.

@@ -10,6 +10,11 @@ type CreateEnvelopeRequest struct {
 	ReturnURL        string            `json:"returnUrl,omitempty"`
 	CancelURL        string            `json:"cancelUrl,omitempty"`
 	ExpiresInMinutes *int              `json:"expiresInMinutes,omitempty"`
+	// When set, every AddSession on this envelope auto-dispatches an
+	// invite email to the signer (if their email differs from Owner.Email),
+	// and Owner.Email receives per-signer completion notifications plus a
+	// final "all signed" message. See Owner.
+	Owner *Owner `json:"owner,omitempty"`
 }
 
 // EnvelopeDocument represents an inline document for an envelope.
@@ -66,6 +71,11 @@ type EnvelopeSession struct {
 	URL           string `json:"url"`
 	ClientSecret  string `json:"clientSecret"`
 	ExpiresAt     string `json:"expiresAt"`
+	// InviteSent is true when SignDocs dispatched an invitation email to
+	// the signer at the time this session was added. Populated only when
+	// the envelope was created with an Owner and Signer.Email differs
+	// from Owner.Email.
+	InviteSent bool `json:"inviteSent,omitempty"`
 }
 
 // EnvelopeSessionSummary represents a session summary within an envelope detail.
