@@ -28,11 +28,11 @@ func TestWebhookEventType_LockstepWithOpenAPI(t *testing.T) {
 
 	sdkEvents := allWebhookEventTypes()
 
-	if len(specEvents) != 17 {
-		t.Errorf("expected 17 events in spec, got %d: %v", len(specEvents), specEvents)
+	if len(specEvents) != 20 {
+		t.Errorf("expected 20 events in spec, got %d: %v", len(specEvents), specEvents)
 	}
-	if len(sdkEvents) != 17 {
-		t.Errorf("expected 17 events in SDK, got %d: %v", len(sdkEvents), sdkEvents)
+	if len(sdkEvents) != 20 {
+		t.Errorf("expected 20 events in SDK, got %d: %v", len(sdkEvents), sdkEvents)
 	}
 
 	specSet := map[string]bool{}
@@ -121,6 +121,9 @@ func allWebhookEventTypes() []WebhookEventType {
 		WebhookEventSigningSessionCompleted,
 		WebhookEventSigningSessionCancelled,
 		WebhookEventSigningSessionExpired,
+		WebhookEventEnvelopeCreated,
+		WebhookEventEnvelopeAllSigned,
+		WebhookEventEnvelopeExpired,
 	}
 }
 

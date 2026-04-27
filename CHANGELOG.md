@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-04-27
+
+### Added
+
+- `EnvelopeID string` on `VerificationResponse` (`json:"envelopeId,omitempty"`) — populated when the verified evidence belongs to a multi-signer envelope. Use it with `client.Verification.VerifyEnvelope(ctx, envelopeID)` for cross-signer drill-down.
+- Three new `WebhookEventType` constants:
+  - `WebhookEventEnvelopeCreated` (`ENVELOPE.CREATED`)
+  - `WebhookEventEnvelopeAllSigned` (`ENVELOPE.ALL_SIGNED`)
+  - `WebhookEventEnvelopeExpired` (`ENVELOPE.EXPIRED`)
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-go/1.5.0`.
+
 ## [1.4.1] - 2026-04-27
 
 ### Fixed

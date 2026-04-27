@@ -101,6 +101,11 @@ const (
 	WebhookEventSigningSessionCancelled WebhookEventType = "SIGNING_SESSION.CANCELLED"
 	WebhookEventSigningSessionExpired   WebhookEventType = "SIGNING_SESSION.EXPIRED"
 
+	// Envelope events (multi-signer flows)
+	WebhookEventEnvelopeCreated   WebhookEventType = "ENVELOPE.CREATED"
+	WebhookEventEnvelopeAllSigned WebhookEventType = "ENVELOPE.ALL_SIGNED"
+	WebhookEventEnvelopeExpired   WebhookEventType = "ENVELOPE.EXPIRED"
+
 	// Deprecated aliases. The original 1.2.x constants used truncated
 	// names for the two NT65 events; keep them pointing at the same
 	// underlying strings so existing consumer code continues to
@@ -623,6 +628,8 @@ type VerificationResponse struct {
 	EvidenceID    string              `json:"evidenceId"`
 	Status        string              `json:"status"`
 	TransactionID string              `json:"transactionId"`
+	// EnvelopeID is set only when the evidence belongs to a multi-signer envelope.
+	EnvelopeID    string              `json:"envelopeId,omitempty"`
 	Purpose       string              `json:"purpose"`
 	DocumentHash  string              `json:"documentHash,omitempty"`
 	EvidenceHash  string              `json:"evidenceHash"`
