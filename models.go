@@ -555,11 +555,18 @@ type WebhookPayload struct {
 	Test          bool             `json:"test,omitempty"`
 }
 
+// WebhookTestDelivery describes the outcome of a single test webhook delivery.
+type WebhookTestDelivery struct {
+	HTTPStatus int    `json:"httpStatus"`
+	Success    bool   `json:"success"`
+	Timestamp  string `json:"timestamp"`
+	Error      string `json:"error,omitempty"`
+}
+
 // WebhookTestResponse is returned when testing a webhook.
 type WebhookTestResponse struct {
-	DeliveryID string `json:"deliveryId"`
-	Status     string `json:"status"`
-	StatusCode *int   `json:"statusCode,omitempty"`
+	WebhookID    string              `json:"webhookId"`
+	TestDelivery WebhookTestDelivery `json:"testDelivery"`
 }
 
 // EvidenceSigner contains the signer info within evidence.

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-04-27
+
+### Fixed
+
+- `WebhookTestResponse` shape now matches the API. Was `{deliveryId, status, statusCode}`, now `{webhookId, testDelivery: {httpStatus, success, error?, timestamp}}` per `WebhookTestResponse` in `openapi.yaml`. The previous typed wrapper unmarshalled all-empty fields against the live HML API. Introduces a new `WebhookTestDelivery` struct for the nested object.
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-go/1.4.1`.
+
 ## [1.4.0] - 2026-04-23
 
 ### Added

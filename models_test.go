@@ -268,6 +268,74 @@ func TestModel_Evidence(t *testing.T) {
 	}
 }
 
+func TestModel_WebhookTestResponse_RoundTrip(t *testing.T) {
+	// Mirrors the live API shape per openapi.yaml WebhookTestResponse:
+	// { "webhookId": "...", "testDelivery": { "httpStatus", "success", "error?", "timestamp" } }.
+	const raw = `{
+		"webhookId": "wh_abc123",
+		"testDelivery": {
+			"httpStatus": 200,
+			"success": true,
+			"timestamp": "2026-04-27T01:23:28.323Z"
+		}
+	}`
+
+	var resp WebhookTestResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal WebhookTestResponse: %v", err)
+	}
+
+	if resp.WebhookID != "wh_abc123" {
+		t.Errorf("expected webhookId 'wh_abc123', got %q", resp.WebhookID)
+	}
+	if resp.TestDelivery.HTTPStatus != 200 {
+		t.Errorf("expected httpStatus 200, got %d", resp.TestDelivery.HTTPStatus)
+	}
+	if !resp.TestDelivery.Success {
+		t.Error("expected success true")
+	}
+	if resp.TestDelivery.Timestamp != "2026-04-27T01:23:28.323Z" {
+		t.Errorf("unexpected timestamp: %q", resp.TestDelivery.Timestamp)
+	}
+	if resp.TestDelivery.Error != "" {
+		t.Errorf("expected empty error on success, got %q", resp.TestDelivery.Error)
+	}
+
+	// Round-trip should preserve the canonical shape (omitempty drops the empty error).
+	out, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("marshal WebhookTestResponse: %v", err)
+	}
+	const want = `{"webhookId":"wh_abc123","testDelivery":{"httpStatus":200,"success":true,"timestamp":"2026-04-27T01:23:28.323Z"}}`
+	if string(out) != want {
+		t.Errorf("round-trip mismatch:\n got  %s\n want %s", string(out), want)
+	}
+
+	// Failure case: error field is populated and serialized.
+	const rawErr = `{
+		"webhookId": "wh_xyz",
+		"testDelivery": {
+			"httpStatus": 502,
+			"success": false,
+			"error": "connection refused",
+			"timestamp": "2026-04-27T01:24:00.000Z"
+		}
+	}`
+	var failResp WebhookTestResponse
+	if err := json.Unmarshal([]byte(rawErr), &failResp); err != nil {
+		t.Fatalf("unmarshal failure WebhookTestResponse: %v", err)
+	}
+	if failResp.TestDelivery.Success {
+		t.Error("expected success false")
+	}
+	if failResp.TestDelivery.Error != "connection refused" {
+		t.Errorf("expected error 'connection refused', got %q", failResp.TestDelivery.Error)
+	}
+	if failResp.TestDelivery.HTTPStatus != 502 {
+		t.Errorf("expected httpStatus 502, got %d", failResp.TestDelivery.HTTPStatus)
+	}
+}
+
 func TestModel_ProblemDetail(t *testing.T) {
 	path := "fixtures/error-400.json"
 	data, err := os.ReadFile(path)
