@@ -121,12 +121,19 @@ func (s *SigningSessionsService) Advance(ctx context.Context, sessionID string, 
 }
 
 // ResendOTP resends the OTP challenge for a signing session.
-func (s *SigningSessionsService) ResendOTP(ctx context.Context, sessionID string) (*AdvanceSessionResponse, error) {
-	var result AdvanceSessionResponse
-	err := s.http.request(ctx, requestOptions{
+// Pass a non-nil req to select the delivery channel (when the signer is
+// allowed to choose); pass nil to resend over the session's default channel.
+func (s *SigningSessionsService) ResendOTP(ctx context.Context, sessionID string, req *ResendOtpRequest) (*AdvanceSessionResponse, error) {
+	opts := requestOptions{
 		Method: http.MethodPost,
 		Path:   fmt.Sprintf("/v1/signing-sessions/%s/resend-otp", sessionID),
-	}, &result)
+	}
+	if req != nil {
+		opts.Body = req
+	}
+
+	var result AdvanceSessionResponse
+	err := s.http.request(ctx, opts, &result)
 	if err != nil {
 		return nil, err
 	}

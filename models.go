@@ -173,6 +173,9 @@ type Signer struct {
 	CNPJ           string     `json:"cnpj,omitempty"`
 	BirthDate      string     `json:"birthDate,omitempty"`
 	OtpChannel     OtpChannel `json:"otpChannel,omitempty"`
+	// OtpChannelSelectable lets the signer choose their OTP delivery channel
+	// during signing instead of being locked to OtpChannel.
+	OtpChannelSelectable bool `json:"otpChannelSelectable,omitempty"`
 }
 
 // ActionMetadata provides metadata for action authentication transactions.

@@ -122,13 +122,21 @@ const (
 
 // AdvanceSessionRequest is the request body for advancing a signing session step.
 type AdvanceSessionRequest struct {
-	Action              AdvanceSessionAction `json:"action"`
-	OtpCode             string               `json:"otpCode,omitempty"`
-	LivenessSessionID   string               `json:"livenessSessionId,omitempty"`
+	Action               AdvanceSessionAction `json:"action"`
+	OtpCode              string               `json:"otpCode,omitempty"`
+	OtpChannel           OtpChannel           `json:"otpChannel,omitempty"`
+	LivenessSessionID    string               `json:"livenessSessionId,omitempty"`
 	CertificateChainPems []string             `json:"certificateChainPems,omitempty"`
-	SignatureRequestID  string               `json:"signatureRequestId,omitempty"`
-	RawSignatureBase64  string               `json:"rawSignatureBase64,omitempty"`
-	Geolocation         *Geolocation         `json:"geolocation,omitempty"`
+	SignatureRequestID   string               `json:"signatureRequestId,omitempty"`
+	RawSignatureBase64   string               `json:"rawSignatureBase64,omitempty"`
+	Geolocation          *Geolocation         `json:"geolocation,omitempty"`
+}
+
+// ResendOtpRequest is the optional request body for resending an OTP challenge.
+// Set Channel to deliver the new OTP over a specific channel (when the signer
+// is allowed to choose); leave it zero to use the session's default channel.
+type ResendOtpRequest struct {
+	Channel OtpChannel `json:"channel,omitempty"`
 }
 
 // AdvanceSessionStep represents a step in an advance session response.
@@ -166,6 +174,12 @@ type BootstrapSigner struct {
 	Name        string `json:"name"`
 	MaskedEmail string `json:"maskedEmail,omitempty"`
 	MaskedCPF   string `json:"maskedCpf,omitempty"`
+	// OtpChannelSelectable is true when the signer may choose their OTP
+	// delivery channel from AvailableOtpChannels.
+	OtpChannelSelectable bool `json:"otpChannelSelectable,omitempty"`
+	// AvailableOtpChannels lists the OTP delivery channels the signer may
+	// choose from when OtpChannelSelectable is true.
+	AvailableOtpChannels []OtpChannel `json:"availableOtpChannels,omitempty"`
 }
 
 // BootstrapStep represents a step in a bootstrap response.

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-06-19
+
+### Added
+
+- `OtpChannelSelectable bool` on `Signer` (`json:"otpChannelSelectable,omitempty"`) — lets a signer choose their OTP delivery channel instead of being locked to `OtpChannel`.
+- `OtpChannelSelectable bool` and `AvailableOtpChannels []OtpChannel` on `BootstrapSigner` (`json:"otpChannelSelectable,omitempty"` / `json:"availableOtpChannels,omitempty"`) — surface the selectable channels in the bootstrap response.
+- `OtpChannel OtpChannel` on `AdvanceSessionRequest` (`json:"otpChannel,omitempty"`) — select the channel when verifying/advancing an OTP step.
+- New `ResendOtpRequest` struct (`Channel OtpChannel`, `json:"channel,omitempty"`) for choosing the resend delivery channel.
+
+### Changed
+
+- `SigningSessionsService.ResendOTP` now accepts a `*ResendOtpRequest` argument (pass `nil` to resend over the session's default channel) and POSTs it as the request body. This is a signature change.
+- `User-Agent` bumped to `signdocs-brasil-go/1.6.0`.
+
 ## [1.5.0] - 2026-04-27
 
 ### Added
