@@ -711,6 +711,31 @@ type EnvelopeVerificationResponse struct {
 	CompletedAt       string                         `json:"completedAt,omitempty"`
 }
 
+// VerifyDocumentRequest is the request body for verifying a PDF document's
+// signatures via POST /v1/verify/document.
+type VerifyDocumentRequest struct {
+	Content  string `json:"content"`            // base64-encoded PDF (required)
+	Filename string `json:"filename,omitempty"` // original filename (optional)
+}
+
+// DetectedSignature describes a single signature detected within a document.
+// Type is one of "pades", "pkcs7", "legacy", or "digital_certificate".
+type DetectedSignature struct {
+	Method     string  `json:"method"`
+	Type       string  `json:"type"`
+	SubFilter  string  `json:"subFilter,omitempty"`
+	Filter     string  `json:"filter,omitempty"`
+	Confidence float64 `json:"confidence"`
+}
+
+// VerifyDocumentResponse is returned when verifying a document's signatures.
+type VerifyDocumentResponse struct {
+	Signed         bool                `json:"signed"`
+	SignatureCount int                 `json:"signatureCount"`
+	Signatures     []DetectedSignature `json:"signatures"`
+	CheckedAt      string              `json:"checkedAt"`
+}
+
 // EnrollUserRequest is the request body for enrolling a user's biometric data.
 type EnrollUserRequest struct {
 	Image  string `json:"image"`           // base64 JPEG (required)

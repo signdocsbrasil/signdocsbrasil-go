@@ -1,0 +1,29 @@
+{
+  "description": "Verify document signatures (authenticated, requires verification:write)",
+  "input": {
+    "content": "JVBERi0xLjQKJ...base64-encoded-pdf...",
+    "filename": "contrato-assinado.pdf"
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/verify/document",
+    "no_auth": false
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "signed": true,
+      "signatureCount": 1,
+      "signatures": [
+        {
+          "method": "pkcs7",
+          "type": "pkcs7",
+          "subFilter": "adbe.pkcs7.detached",
+          "filter": "Adobe.PPKLite",
+          "confidence": 1.0
+        }
+      ],
+      "checkedAt": "2024-11-15T00:01:00.000Z"
+    }
+  }
+}

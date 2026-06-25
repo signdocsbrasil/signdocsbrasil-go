@@ -48,6 +48,23 @@ func (s *VerificationService) Downloads(ctx context.Context, evidenceID string) 
 	return &result, nil
 }
 
+// VerifyDocument analyzes an uploaded PDF and reports any signatures it
+// contains. Unlike the other VerificationService methods, this endpoint is
+// authenticated: it requires a Bearer token with the verification:write
+// scope and is restricted to production credentials at runtime.
+func (s *VerificationService) VerifyDocument(ctx context.Context, req *VerifyDocumentRequest) (*VerifyDocumentResponse, error) {
+	var result VerifyDocumentResponse
+	err := s.http.request(ctx, requestOptions{
+		Method: http.MethodPost,
+		Path:   "/v1/verify/document",
+		Body:   req,
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // VerifyEnvelope retrieves public verification data for a multi-signer
 // envelope, including the list of signers (each with an EvidenceID for
 // drill-down via Verify) and consolidated download URLs. For non-PDF

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `VerificationService.VerifyDocument(ctx, *VerifyDocumentRequest)` — POSTs a base64-encoded PDF to `/v1/verify/document` and reports detected signatures. Unlike the other `VerificationService` methods, this endpoint is authenticated: it requires a Bearer token with the `verification:write` scope and is restricted to production credentials at runtime. New `VerifyDocumentRequest` (`Content`, `Filename`), `VerifyDocumentResponse` (`Signed`, `SignatureCount`, `Signatures`, `CheckedAt`), and `DetectedSignature` (`Method`, `Type`, `SubFilter`, `Filter`, `Confidence`) structs. `Type` is one of `pades`, `pkcs7`, `legacy`, or `digital_certificate`.
 - `OtpChannelSelectable bool` on `Signer` (`json:"otpChannelSelectable,omitempty"`) — lets a signer choose their OTP delivery channel instead of being locked to `OtpChannel`.
 - `OtpChannelSelectable bool` and `AvailableOtpChannels []OtpChannel` on `BootstrapSigner` (`json:"otpChannelSelectable,omitempty"` / `json:"availableOtpChannels,omitempty"`) — surface the selectable channels in the bootstrap response.
 - `OtpChannel OtpChannel` on `AdvanceSessionRequest` (`json:"otpChannel,omitempty"`) — select the channel when verifying/advancing an OTP step.

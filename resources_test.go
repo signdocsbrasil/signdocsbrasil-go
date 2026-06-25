@@ -266,6 +266,61 @@ func TestVerification_VerifyNoAuth(t *testing.T) {
 	}
 }
 
+func TestVerification_VerifyDocumentAuth(t *testing.T) {
+	server, hc := setupResourceTest(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v1/verify/document" && r.Method == "POST" {
+			if r.Header.Get("Authorization") == "" {
+				t.Error("expected Authorization for document verification")
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{
+				"signed": true,
+				"signatureCount": 1,
+				"signatures": [
+					{
+						"method": "pkcs7",
+						"type": "pkcs7",
+						"subFilter": "adbe.pkcs7.detached",
+						"filter": "Adobe.PPKLite",
+						"confidence": 1.0
+					}
+				],
+				"checkedAt": "2024-11-15T00:01:00.000Z"
+			}`))
+			return
+		}
+		w.WriteHeader(404)
+	})
+	defer server.Close()
+
+	svc := newVerificationService(hc)
+	resp, err := svc.VerifyDocument(context.Background(), &VerifyDocumentRequest{
+		Content:  "JVBERi0xLjQ=",
+		Filename: "contrato-assinado.pdf",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !resp.Signed {
+		t.Errorf("expected signed true, got %v", resp.Signed)
+	}
+	if resp.SignatureCount != 1 {
+		t.Errorf("expected signatureCount 1, got %d", resp.SignatureCount)
+	}
+	if len(resp.Signatures) != 1 {
+		t.Fatalf("expected 1 signature, got %d", len(resp.Signatures))
+	}
+	if resp.Signatures[0].Type != "pkcs7" {
+		t.Errorf("expected type pkcs7, got %s", resp.Signatures[0].Type)
+	}
+	if resp.Signatures[0].SubFilter != "adbe.pkcs7.detached" {
+		t.Errorf("expected subFilter adbe.pkcs7.detached, got %s", resp.Signatures[0].SubFilter)
+	}
+	if resp.Signatures[0].Confidence != 1.0 {
+		t.Errorf("expected confidence 1.0, got %v", resp.Signatures[0].Confidence)
+	}
+}
+
 func TestVerification_DownloadsNoAuth(t *testing.T) {
 	server, hc := setupResourceTest(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/v1/verify/ev_1/downloads" && r.Method == "GET" {
