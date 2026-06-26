@@ -186,4 +186,4 @@ tx, err := client.Transactions.Get(ctx, "tx_123")
 
 ## Documentação
 
-Para guias completos de integração com exemplos passo-a-passo de todos os fluxos de assinatura, veja a [documentação centralizada](../docs/README.md).
+Para guias completos de integração com exemplos passo-a-passo de todos os fluxos de assinatura, veja a [documentação completa da API](https://docs.signdocs.com.br).
