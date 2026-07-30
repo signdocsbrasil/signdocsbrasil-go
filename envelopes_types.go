@@ -112,3 +112,25 @@ type EnvelopeCombinedStampResponse struct {
 	ExpiresIn   int    `json:"expiresIn"`
 	SignerCount int    `json:"signerCount"`
 }
+
+// CancelledEnvelopeSession identifies a session stopped by an envelope cancel.
+type CancelledEnvelopeSession struct {
+	SessionID     string `json:"sessionId"`
+	TransactionID string `json:"transactionId"`
+}
+
+// CancelEnvelopeResponse is the result of cancelling an entire envelope.
+//
+// PreservedSignedCount reports signatures already collected, which are left
+// untouched — cancelling stops the pending signers, it never invalidates
+// evidence already gathered. AlreadyCancelled is set when the envelope was
+// already CANCELLED, in which case CancelledCount is 0; the endpoint is
+// idempotent, so re-cancelling is a safe no-op.
+type CancelEnvelopeResponse struct {
+	EnvelopeID           string                     `json:"envelopeId"`
+	Status               string                     `json:"status"`
+	CancelledCount       int                        `json:"cancelledCount"`
+	PreservedSignedCount int                        `json:"preservedSignedCount"`
+	CancelledSessions    []CancelledEnvelopeSession `json:"cancelledSessions,omitempty"`
+	AlreadyCancelled     bool                       `json:"alreadyCancelled,omitempty"`
+}

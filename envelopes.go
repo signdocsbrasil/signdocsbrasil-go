@@ -62,6 +62,39 @@ func (s *EnvelopesService) AddSession(ctx context.Context, envelopeID string, re
 	return &result, nil
 }
 
+// Cancel cancels an entire envelope.
+//
+// It transitions every non-terminal session and its transaction to CANCELLED
+// and marks the envelope CANCELLED, killing the pending signing links.
+// Signatures already collected are preserved and reported as
+// PreservedSignedCount.
+//
+// Prefer this over cancelling each session individually: it is one call, it
+// records the cancellation as a single auditable terminal event, and it is the
+// only way to move the envelope's own status. Cancelling the member sessions
+// one by one leaves the envelope itself ACTIVE.
+//
+// Idempotent: re-cancelling returns CancelledCount 0 and AlreadyCancelled true.
+//
+// reason is recorded in the audit trail; pass "" to let the API default it to
+// "envelope_cancelled".
+func (s *EnvelopesService) Cancel(ctx context.Context, envelopeID string, reason string) (*CancelEnvelopeResponse, error) {
+	body := map[string]string{}
+	if reason != "" {
+		body["reason"] = reason
+	}
+	var result CancelEnvelopeResponse
+	err := s.http.request(ctx, requestOptions{
+		Method: http.MethodPost,
+		Path:   fmt.Sprintf("/v1/envelopes/%s/cancel", envelopeID),
+		Body:   body,
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // CombinedStamp retrieves the combined signed PDF for a completed envelope.
 func (s *EnvelopesService) CombinedStamp(ctx context.Context, envelopeID string) (*EnvelopeCombinedStampResponse, error) {
 	var result EnvelopeCombinedStampResponse
