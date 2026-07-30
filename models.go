@@ -415,8 +415,22 @@ type DownloadResponse struct {
 	TransactionID string `json:"transactionId"`
 	DocumentHash  string `json:"documentHash,omitempty"`
 	OriginalURL   string `json:"originalUrl,omitempty"`
-	SignedURL     string `json:"signedUrl,omitempty"`
-	ExpiresIn     int    `json:"expiresIn"`
+	// SignedURL is the signed/stamped document. Set for PDF transactions
+	// (DocumentFormat "pdf"), where the signature is embedded in the PDF.
+	SignedURL string `json:"signedUrl,omitempty"`
+	ExpiresIn int    `json:"expiresIn"`
+	// SignatureURL is the detached CAdES signature (.p7s). Returned instead of
+	// SignedURL for non-PDF transactions (DocumentFormat "generic"), which
+	// cannot carry an embedded signature.
+	//
+	// Caveat: the API presigns this key without checking that the object
+	// exists, so a non-PDF signed under a click/OTP policy still returns a URL
+	// here — one that 404s, because only the digital-certificate step writes a
+	// .p7s. Branch on the signing policy, not on this field being set.
+	SignatureURL string `json:"signatureUrl,omitempty"`
+	// DocumentFormat is "pdf" or "generic", derived by the API from the
+	// uploaded bytes rather than the filename.
+	DocumentFormat string `json:"documentFormat,omitempty"`
 }
 
 // StartStepRequest is the optional request body for starting a step.
