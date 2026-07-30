@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-07-30
+
+### Added
+
+- **Envelope cancellation** — `POST /v1/envelopes/{envelopeId}/cancel` has existed since envelopes shipped and is what the Telegram bot calls, but no SDK exposed it. Consumers were left cancelling each member session by hand, which is not the same operation: it leaves the envelope's own status ACTIVE (verified against HML — an envelope whose sessions are every one CANCELLED still reports ACTIVE), costs a call per signer, and records N separate cancellations instead of one auditable terminal event.
+  - Transitions every non-terminal session and its transaction to CANCELLED, then marks the envelope CANCELLED.
+  - Signatures already collected are preserved and reported as `preservedSignedCount` — cancelling stops the pending signers, it never invalidates evidence already gathered.
+  - Idempotent: re-cancelling returns `cancelledCount` 0 and `alreadyCancelled` true.
+  - Optional `reason` is recorded in the audit trail; the API defaults it to `envelope_cancelled`.
+  - Shipped in lockstep with signdocs-brasil-php 1.9.0.
+
+### Changed
+
+- `User-Agent` bumped to `signdocsbrasil-go/1.8.0`.
+
 ## [1.7.0] - 2026-07-29
 
 ### Added
