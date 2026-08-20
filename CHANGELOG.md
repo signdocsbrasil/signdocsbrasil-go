@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-08-20
+
+### Fixed
+
+- **`addSession`/`verifyDocument` sent no idempotency key** while the client
+  retries 429/500/503, so a 500 on an add-session became a second signer, a
+  second quota charge and a second invitation, and a retried `verifyDocument`
+  paid the metered verification quota twice for an identical result. Pass a
+  distinct key per signer: the API scopes its cache by key and resolved path,
+  and all signers on an envelope share that path.
+
 ## [1.8.0] - 2026-07-30
 
 ### Added
