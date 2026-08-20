@@ -80,7 +80,7 @@ client, _ := signdocs.NewClient("seu_client_id",
 | `client.Verification` | `Verify`, `Downloads` |
 | `client.Users` | `Enroll` |
 | `client.Webhooks` | `Register`, `List`, `Delete`, `Test` |
-| `client.SigningSessions` | `Create`, `GetStatus`, `Cancel`, `List`, `WaitForCompletion` |
+| `client.SigningSessions` | `Create`, `GetStatus`, `Cancel`, `Link`, `List`, `WaitForCompletion` |
 | `client.Envelopes` | `Create`, `Get`, `AddSession`, `CombinedStamp` |
 | `client.DocumentGroups` | `CombinedStamp` |
 | `client.Health` | `Check`, `History` |

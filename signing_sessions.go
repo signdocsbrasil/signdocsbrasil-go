@@ -63,6 +63,38 @@ func (s *SigningSessionsService) Cancel(ctx context.Context, sessionID string) (
 	return &result, nil
 }
 
+// Link mints a fresh signing URL for an existing session and returns it, instead
+// of e-mailing it.
+//
+// A signing link is single-use: once the signer finishes — or the embed token is
+// otherwise consumed — reopening the same URL returns
+// "401 Embed token has been consumed". Link issues a new one without creating
+// another transaction and without consuming quota. It works for standalone and
+// envelope sessions alike.
+//
+// The session must be ACTIVE; a completed or cancelled one returns
+// *ConflictError, since a link to a finished session would authenticate nothing.
+// Use Envelopes.CombinedStamp or Transactions.Download to reach the signed
+// document instead.
+//
+// ExpiresAt is inherited from the original session and is not extended.
+//
+// Link authorises the tenant, not the end user. The API cannot tell which of your
+// users is entitled to this link, so an application whose users share one tenant
+// must establish that itself before calling — otherwise this becomes a way for
+// one user to obtain another's signing credential.
+func (s *SigningSessionsService) Link(ctx context.Context, sessionID string) (*MintSigningLinkResponse, error) {
+	var result MintSigningLinkResponse
+	err := s.http.request(ctx, requestOptions{
+		Method: http.MethodPost,
+		Path:   fmt.Sprintf("/v1/signing-sessions/%s/link", sessionID),
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // List returns a paginated list of signing sessions matching the filter parameters.
 func (s *SigningSessionsService) List(ctx context.Context, params *SigningSessionListParams) (*SigningSessionListResponse, error) {
 	query := make(map[string]string)

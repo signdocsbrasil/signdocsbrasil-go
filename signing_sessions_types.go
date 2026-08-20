@@ -84,6 +84,18 @@ type CancelSigningSessionResponse struct {
 	CancelledAt   string `json:"cancelledAt"`
 }
 
+// MintSigningLinkResponse is a freshly minted signing URL for an existing session.
+type MintSigningLinkResponse struct {
+	SessionID     string `json:"sessionId"`
+	TransactionID string `json:"transactionId"`
+	// URL is single-use. Treat it as a bearer credential.
+	URL string `json:"url"`
+	// ExpiresAt is the deadline of the original session; Link does not extend it.
+	ExpiresAt string `json:"expiresAt"`
+	// ExpiresIn is the number of seconds remaining until ExpiresAt.
+	ExpiresIn int `json:"expiresIn"`
+}
+
 // SigningSessionListParams contains filter and pagination parameters.
 type SigningSessionListParams struct {
 	Status string
