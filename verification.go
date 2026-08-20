@@ -52,13 +52,23 @@ func (s *VerificationService) Downloads(ctx context.Context, evidenceID string) 
 // contains. Unlike the other VerificationService methods, this endpoint is
 // authenticated: it requires a Bearer token with the verification:write
 // scope and is restricted to production credentials at runtime.
-func (s *VerificationService) VerifyDocument(ctx context.Context, req *VerifyDocumentRequest) (*VerifyDocumentResponse, error) {
+//
+// The endpoint is metered and its answer is a pure function of the PDF, so an
+// unkeyed retry pays the verification quota twice for an identical result. An
+// X-Idempotency-Key header is set automatically; pass WithIdempotencyKey for a
+// specific one.
+func (s *VerificationService) VerifyDocument(ctx context.Context, req *VerifyDocumentRequest, opts ...CreateOption) (*VerifyDocumentResponse, error) {
+	o := &createOptions{}
+	for _, opt := range opts {
+		opt(o)
+	}
+
 	var result VerifyDocumentResponse
-	err := s.http.request(ctx, requestOptions{
+	err := s.http.requestWithIdempotency(ctx, requestOptions{
 		Method: http.MethodPost,
 		Path:   "/v1/verify/document",
 		Body:   req,
-	}, &result)
+	}, &result, o.idempotencyKey)
 	if err != nil {
 		return nil, err
 	}

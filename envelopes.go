@@ -48,14 +48,25 @@ func (s *EnvelopesService) Get(ctx context.Context, envelopeID string) (*Envelop
 	return &result, nil
 }
 
-// AddSession adds a signing session to an envelope.
-func (s *EnvelopesService) AddSession(ctx context.Context, envelopeID string, req *AddEnvelopeSessionRequest) (*EnvelopeSession, error) {
+// AddSession adds a signer session to an envelope. An X-Idempotency-Key header
+// is set automatically; pass WithIdempotencyKey for a specific one.
+//
+// Use a distinct key per signer. The API scopes its idempotency cache by key
+// and resolved path, and every signer on an envelope shares that path, so one
+// key across the loop returns signer 1's response — and signer 1's
+// ClientSecret — for signer 2.
+func (s *EnvelopesService) AddSession(ctx context.Context, envelopeID string, req *AddEnvelopeSessionRequest, opts ...CreateOption) (*EnvelopeSession, error) {
+	o := &createOptions{}
+	for _, opt := range opts {
+		opt(o)
+	}
+
 	var result EnvelopeSession
-	err := s.http.request(ctx, requestOptions{
+	err := s.http.requestWithIdempotency(ctx, requestOptions{
 		Method: http.MethodPost,
 		Path:   fmt.Sprintf("/v1/envelopes/%s/sessions", envelopeID),
 		Body:   req,
-	}, &result)
+	}, &result, o.idempotencyKey)
 	if err != nil {
 		return nil, err
 	}

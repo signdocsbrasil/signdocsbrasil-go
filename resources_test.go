@@ -423,3 +423,49 @@ func TestVerification_VerifyEnvelopeNoAuth(t *testing.T) {
 		t.Errorf("expected combinedSignedPdf nil, got %+v", resp.Downloads.CombinedSignedPDF)
 	}
 }
+
+// AddSession and VerifyDocument went unkeyed while the client retries
+// {429, 500, 503}. A 500 on an add-session therefore became a second signer, a
+// second quota charge and a second invitation — and that response carries the
+// only copy of ClientSecret. Create() alongside them was already keyed, which
+// is what made the gap easy to miss.
+func TestIdempotencyKeyIsSentOnAddSessionAndVerifyDocument(t *testing.T) {
+	var got string
+	server, hc := setupResourceTest(t, func(w http.ResponseWriter, r *http.Request) {
+		got = r.Header.Get("X-Idempotency-Key")
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{}`))
+	})
+	defer server.Close()
+
+	t.Run("AddSession", func(t *testing.T) {
+		got = ""
+		svc := &EnvelopesService{http: hc}
+		_, _ = svc.AddSession(context.Background(), "env_1",
+			&AddEnvelopeSessionRequest{}, WithIdempotencyKey("idem-signer-1"))
+		if got != "idem-signer-1" {
+			t.Fatalf("AddSession sent X-Idempotency-Key %q, want idem-signer-1", got)
+		}
+	})
+
+	t.Run("VerifyDocument", func(t *testing.T) {
+		got = ""
+		svc := &VerificationService{http: hc}
+		_, _ = svc.VerifyDocument(context.Background(),
+			&VerifyDocumentRequest{}, WithIdempotencyKey("idem-vd-1"))
+		if got != "idem-vd-1" {
+			t.Fatalf("VerifyDocument sent X-Idempotency-Key %q, want idem-vd-1", got)
+		}
+	})
+
+	// Omitting the option must still take the idempotent path — the client
+	// mints a key so it stays stable across its own retries.
+	t.Run("DefaultsToGeneratedKey", func(t *testing.T) {
+		got = ""
+		svc := &EnvelopesService{http: hc}
+		_, _ = svc.AddSession(context.Background(), "env_1", &AddEnvelopeSessionRequest{})
+		if got == "" {
+			t.Fatal("AddSession sent no X-Idempotency-Key when the option was omitted")
+		}
+	})
+}
