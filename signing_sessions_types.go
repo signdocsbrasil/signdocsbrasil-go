@@ -123,14 +123,44 @@ type SigningSessionListItem struct {
 type AdvanceSessionAction string
 
 const (
-	AdvanceActionAccept           AdvanceSessionAction = "accept"
-	AdvanceActionVerifyOTP        AdvanceSessionAction = "verify_otp"
-	AdvanceActionResendOTP        AdvanceSessionAction = "resend_otp"
-	AdvanceActionStartLiveness    AdvanceSessionAction = "start_liveness"
-	AdvanceActionCompleteLiveness AdvanceSessionAction = "complete_liveness"
-	AdvanceActionPrepareSigning   AdvanceSessionAction = "prepare_signing"
-	AdvanceActionCompleteSigning  AdvanceSessionAction = "complete_signing"
+	AdvanceActionConfirmSigner         AdvanceSessionAction = "confirm_signer"
+	AdvanceActionAccept                AdvanceSessionAction = "accept"
+	AdvanceActionVerifyOTP             AdvanceSessionAction = "verify_otp"
+	AdvanceActionResendOTP             AdvanceSessionAction = "resend_otp"
+	AdvanceActionStartLiveness         AdvanceSessionAction = "start_liveness"
+	AdvanceActionCompleteLiveness      AdvanceSessionAction = "complete_liveness"
+	AdvanceActionPrepareSigning        AdvanceSessionAction = "prepare_signing"
+	AdvanceActionCompleteSigning       AdvanceSessionAction = "complete_signing"
+	AdvanceActionCompleteDocumentPhoto AdvanceSessionAction = "complete_document_photo"
 )
+
+// Advance error codes returned in AdvanceSessionResponse.ErrorCode when a step
+// is rejected but the request itself succeeds. See that field for why this
+// matters.
+const (
+	AdvanceErrorBiometricMatchFailed = "BIOMETRIC_MATCH_FAILED"
+	AdvanceErrorLivenessNotCompleted = "LIVENESS_NOT_COMPLETED"
+	AdvanceErrorDocumentQualityLow   = "DOCUMENT_QUALITY_LOW"
+	AdvanceErrorDocumentMatchFailed  = "DOCUMENT_MATCH_FAILED"
+)
+
+// DeviceInfo describes the signer's device, recorded in the evidence alongside
+// geolocation.
+type DeviceInfo struct {
+	ScreenWidth  int    `json:"screenWidth,omitempty"`
+	ScreenHeight int    `json:"screenHeight,omitempty"`
+	Language     string `json:"language,omitempty"`
+	Platform     string `json:"platform,omitempty"`
+	TouchPoints  int    `json:"touchPoints,omitempty"`
+}
+
+// AdvanceFallback is set when the policy diverted to an alternative step
+// instead of failing outright.
+type AdvanceFallback struct {
+	Triggered    bool   `json:"triggered"`
+	Reason       string `json:"reason,omitempty"`
+	NextStepType string `json:"nextStepType,omitempty"`
+}
 
 // AdvanceSessionRequest is the request body for advancing a signing session step.
 type AdvanceSessionRequest struct {
@@ -141,7 +171,27 @@ type AdvanceSessionRequest struct {
 	CertificateChainPems []string             `json:"certificateChainPems,omitempty"`
 	SignatureRequestID   string               `json:"signatureRequestId,omitempty"`
 	RawSignatureBase64   string               `json:"rawSignatureBase64,omitempty"`
-	Geolocation          *Geolocation         `json:"geolocation,omitempty"`
+
+	// CpfCnpj is the CPF or CNPJ the signer types to confirm their own
+	// identity (required by AdvanceActionConfirmSigner).
+	CpfCnpj string `json:"cpfCnpj,omitempty"`
+
+	// DocumentImage is a base64 identity-document photo, max 5MB (required by
+	// AdvanceActionCompleteDocumentPhoto).
+	DocumentImage string `json:"documentImage,omitempty"`
+	DocumentType  string `json:"documentType,omitempty"`
+
+	// Sandbox-only simulated scores, so a rejection can be rehearsed. Read
+	// only once the step already resolved to sandbox — they can never make a
+	// real verification pass. Pointers so an unset score is omitted rather
+	// than sent as 0, which is a meaningful value here.
+	SandboxSimilarity         *float64 `json:"sandboxSimilarity,omitempty"`
+	SandboxLivenessConfidence *float64 `json:"sandboxLivenessConfidence,omitempty"`
+	SandboxBrightness         *float64 `json:"sandboxBrightness,omitempty"`
+	SandboxSharpness          *float64 `json:"sandboxSharpness,omitempty"`
+
+	Geolocation *Geolocation `json:"geolocation,omitempty"`
+	DeviceInfo  *DeviceInfo  `json:"deviceInfo,omitempty"`
 }
 
 // ResendOtpRequest is the optional request body for resending an OTP challenge.
@@ -161,6 +211,8 @@ type AdvanceSessionStep struct {
 // SandboxData contains sandbox-only data (HML environment).
 type SandboxData struct {
 	OtpCode string `json:"otpCode,omitempty"`
+	// AutoPass indicates the biometric step will be approved automatically.
+	AutoPass bool `json:"autoPass,omitempty"`
 }
 
 // AdvanceSessionResponse is returned when a signing session step is advanced.
@@ -179,6 +231,25 @@ type AdvanceSessionResponse struct {
 	HashAlgorithm      string              `json:"hashAlgorithm,omitempty"`
 	SignatureAlgorithm string              `json:"signatureAlgorithm,omitempty"`
 	Sandbox            *SandboxData        `json:"sandbox,omitempty"`
+
+	// ErrorCode says why a step was rejected, when the step fails but the
+	// *request* does not.
+	//
+	// This is the part that matters most in a biometric integration: a
+	// rejected step comes back 200 with the session still ACTIVE and the
+	// reason here, not as an HTTP error. Code that only checks the error
+	// returned by Advance reads a rejection as success.
+	ErrorCode string `json:"errorCode,omitempty"`
+
+	// ErrorDetail is pt-BR text addressed to the signer, ready to display.
+	ErrorDetail string `json:"errorDetail,omitempty"`
+
+	// Retryable is true while the step has attempts left. Once they run out
+	// the step goes FAILED and this is false — the signal that retrying will
+	// not help. Each retry is billed as overage.
+	Retryable bool `json:"retryable,omitempty"`
+
+	Fallback *AdvanceFallback `json:"fallback,omitempty"`
 }
 
 // BootstrapSigner contains masked signer information in a bootstrap response.
@@ -221,7 +292,7 @@ type SigningSessionBootstrap struct {
 	ExpiresAt     string                    `json:"expiresAt"`
 	Document      *BootstrapDocument        `json:"document,omitempty"`
 	Action        *ActionMetadata           `json:"action,omitempty"`
-	Appearance    *SigningSessionAppearance  `json:"appearance,omitempty"`
+	Appearance    *SigningSessionAppearance `json:"appearance,omitempty"`
 	ReturnURL     string                    `json:"returnUrl,omitempty"`
 	CancelURL     string                    `json:"cancelUrl,omitempty"`
 }
