@@ -91,6 +91,13 @@ const (
 	WebhookEventStepFailed                WebhookEventType = "STEP.FAILED"
 	WebhookEventStepPurposeDisclosureSent WebhookEventType = "STEP.PURPOSE_DISCLOSURE_SENT"
 
+	// Enrollment expiry events. The reference image is hard-deleted by S3
+	// lifecycle after the retention window, while the enrolment record
+	// outlives it by a grace period — these are the warning that a
+	// re-enrolment is due before a signature fails with 422.
+	WebhookEventEnrollmentExpiring WebhookEventType = "ENROLLMENT.EXPIRING"
+	WebhookEventEnrollmentExpired  WebhookEventType = "ENROLLMENT.EXPIRED"
+
 	// Tenant-level events
 	WebhookEventQuotaWarning   WebhookEventType = "QUOTA.WARNING"
 	WebhookEventAPIDeprecation WebhookEventType = "API.DEPRECATION_NOTICE"
@@ -160,6 +167,21 @@ type Geolocation struct {
 type Policy struct {
 	Profile     PolicyProfile `json:"profile"`
 	CustomSteps []StepType    `json:"customSteps,omitempty"`
+
+	// MinSimilarity is the minimum facial-match similarity this transaction
+	// requires, for the BIOMETRIC_MATCH and DOCUMENT_PHOTO_MATCH steps.
+	//
+	// Tightens only: the value must be at or above the tenant's configured
+	// threshold, and anything lower is rejected with 400 naming the current
+	// minimum rather than silently ignored — loosening identity checking is
+	// the tenant's decision, not the caller's. Percentage (95) or fraction
+	// (0.95). Pointer so an unset bar is omitted rather than sent as 0,
+	// which the API would reject.
+	MinSimilarity *float64 `json:"minSimilarity,omitempty"`
+
+	// MinLivenessConfidence is the minimum liveness confidence this
+	// transaction requires (BIOMETRIC_LIVENESS). Same rule as MinSimilarity.
+	MinLivenessConfidence *float64 `json:"minLivenessConfidence,omitempty"`
 }
 
 // Signer identifies the person performing the transaction.

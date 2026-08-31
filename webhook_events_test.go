@@ -28,11 +28,14 @@ func TestWebhookEventType_LockstepWithOpenAPI(t *testing.T) {
 
 	sdkEvents := allWebhookEventTypes()
 
-	if len(specEvents) != 20 {
-		t.Errorf("expected 20 events in spec, got %d: %v", len(specEvents), specEvents)
+	// 20 -> 22 when ENROLLMENT.EXPIRING / ENROLLMENT.EXPIRED landed in the
+	// spec. The count is a tripwire on purpose: a spec addition should fail
+	// here until someone decides the SDK models it too.
+	if len(specEvents) != 22 {
+		t.Errorf("expected 22 events in spec, got %d: %v", len(specEvents), specEvents)
 	}
-	if len(sdkEvents) != 20 {
-		t.Errorf("expected 20 events in SDK, got %d: %v", len(sdkEvents), sdkEvents)
+	if len(sdkEvents) != 22 {
+		t.Errorf("expected 22 events in SDK, got %d: %v", len(sdkEvents), sdkEvents)
 	}
 
 	specSet := map[string]bool{}
@@ -115,6 +118,8 @@ func allWebhookEventTypes() []WebhookEventType {
 		WebhookEventStepCompleted,
 		WebhookEventStepFailed,
 		WebhookEventStepPurposeDisclosureSent,
+		WebhookEventEnrollmentExpiring,
+		WebhookEventEnrollmentExpired,
 		WebhookEventQuotaWarning,
 		WebhookEventAPIDeprecation,
 		WebhookEventSigningSessionCreated,
