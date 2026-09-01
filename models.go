@@ -42,14 +42,14 @@ const (
 type PolicyProfile string
 
 const (
-	PolicyProfileClickOnly              PolicyProfile = "CLICK_ONLY"
-	PolicyProfileClickPlusOTP           PolicyProfile = "CLICK_PLUS_OTP"
-	PolicyProfileBiometric              PolicyProfile = "BIOMETRIC"
-	PolicyProfileBiometricPlusOTP       PolicyProfile = "BIOMETRIC_PLUS_OTP"
-	PolicyProfileDigitalCertificate     PolicyProfile = "DIGITAL_CERTIFICATE"
-	PolicyProfileBiometricSerpro        PolicyProfile = "BIOMETRIC_SERPRO"
-	PolicyProfileBiometricDocFallback   PolicyProfile = "BIOMETRIC_DOCUMENT_FALLBACK"
-	PolicyProfileCustom                 PolicyProfile = "CUSTOM"
+	PolicyProfileClickOnly            PolicyProfile = "CLICK_ONLY"
+	PolicyProfileClickPlusOTP         PolicyProfile = "CLICK_PLUS_OTP"
+	PolicyProfileBiometric            PolicyProfile = "BIOMETRIC"
+	PolicyProfileBiometricPlusOTP     PolicyProfile = "BIOMETRIC_PLUS_OTP"
+	PolicyProfileDigitalCertificate   PolicyProfile = "DIGITAL_CERTIFICATE"
+	PolicyProfileBiometricSerpro      PolicyProfile = "BIOMETRIC_SERPRO"
+	PolicyProfileBiometricDocFallback PolicyProfile = "BIOMETRIC_DOCUMENT_FALLBACK"
+	PolicyProfileCustom               PolicyProfile = "CUSTOM"
 )
 
 // TransactionPurpose represents the purpose of a transaction.
@@ -237,10 +237,10 @@ type DocumentInline struct {
 
 // LivenessResult contains biometric liveness check results.
 type LivenessResult struct {
-	Confidence           float64     `json:"confidence"`
-	Provider             string      `json:"provider"`
-	CaptureMode          CaptureMode `json:"captureMode"`
-	ComplianceStandards  []string    `json:"complianceStandards,omitempty"`
+	Confidence          float64     `json:"confidence"`
+	Provider            string      `json:"provider"`
+	CaptureMode         CaptureMode `json:"captureMode"`
+	ComplianceStandards []string    `json:"complianceStandards,omitempty"`
 }
 
 // MatchResult contains biometric match results.
@@ -304,13 +304,13 @@ type GovernmentDbValidation struct {
 
 // SerproIdentityResult contains the result of a SERPRO identity check.
 type SerproIdentityResult struct {
-	Valid                bool                `json:"valid"`
-	Provider             string              `json:"provider"`
-	NameMatch            bool                `json:"nameMatch"`
-	BirthDateMatch       bool                `json:"birthDateMatch"`
-	BiometricMatch       bool                `json:"biometricMatch"`
-	BiometricConfidence  float64             `json:"biometricConfidence"`
-	GovernmentDatabase   GovernmentDatabase  `json:"governmentDatabase,omitempty"`
+	Valid               bool               `json:"valid"`
+	Provider            string             `json:"provider"`
+	NameMatch           bool               `json:"nameMatch"`
+	BirthDateMatch      bool               `json:"birthDateMatch"`
+	BiometricMatch      bool               `json:"biometricMatch"`
+	BiometricConfidence float64            `json:"biometricConfidence"`
+	GovernmentDatabase  GovernmentDatabase `json:"governmentDatabase,omitempty"`
 }
 
 // BiographicValidation contains biographic data validation from document extraction.
@@ -325,12 +325,12 @@ type BiographicValidation struct {
 
 // DocumentPhotoMatchResult contains the result of a document photo match step.
 type DocumentPhotoMatchResult struct {
-	DocumentType            string                `json:"documentType"`
-	ExtractedFaceHash       string                `json:"extractedFaceHash"`
-	Similarity              float64               `json:"similarity"`
-	Threshold               float64               `json:"threshold"`
-	FaceExtractionConfidence float64              `json:"faceExtractionConfidence"`
-	BiographicValidation    *BiographicValidation `json:"biographicValidation,omitempty"`
+	DocumentType             string                `json:"documentType"`
+	ExtractedFaceHash        string                `json:"extractedFaceHash"`
+	Similarity               float64               `json:"similarity"`
+	Threshold                float64               `json:"threshold"`
+	FaceExtractionConfidence float64               `json:"faceExtractionConfidence"`
+	BiographicValidation     *BiographicValidation `json:"biographicValidation,omitempty"`
 }
 
 // QualityResult contains image quality assessment results.
@@ -342,18 +342,18 @@ type QualityResult struct {
 
 // StepResult contains the outcome of a completed step.
 type StepResult struct {
-	Liveness           *LivenessResult           `json:"liveness,omitempty"`
-	Match              *MatchResult              `json:"match,omitempty"`
-	OTP                *OTPResult                `json:"otp,omitempty"`
-	Click              *ClickResult              `json:"click,omitempty"`
-	PurposeDisclosure  *PurposeDisclosureResult  `json:"purposeDisclosure,omitempty"`
-	DigitalSignature   *DigitalSignatureResult   `json:"digitalSignature,omitempty"`
-	SerproIdentity         *SerproIdentityResult  `json:"serproIdentity,omitempty"`
-	GovernmentDbValidation *GovernmentDbValidation `json:"governmentDbValidation,omitempty"`
-	Geolocation            *Geolocation            `json:"geolocation,omitempty"`
+	Liveness               *LivenessResult           `json:"liveness,omitempty"`
+	Match                  *MatchResult              `json:"match,omitempty"`
+	OTP                    *OTPResult                `json:"otp,omitempty"`
+	Click                  *ClickResult              `json:"click,omitempty"`
+	PurposeDisclosure      *PurposeDisclosureResult  `json:"purposeDisclosure,omitempty"`
+	DigitalSignature       *DigitalSignatureResult   `json:"digitalSignature,omitempty"`
+	SerproIdentity         *SerproIdentityResult     `json:"serproIdentity,omitempty"`
+	GovernmentDbValidation *GovernmentDbValidation   `json:"governmentDbValidation,omitempty"`
+	Geolocation            *Geolocation              `json:"geolocation,omitempty"`
 	DocumentPhotoMatch     *DocumentPhotoMatchResult `json:"documentPhotoMatch,omitempty"`
-	Quality            *QualityResult            `json:"quality,omitempty"`
-	ProviderTimestamp  string                    `json:"providerTimestamp,omitempty"`
+	Quality                *QualityResult            `json:"quality,omitempty"`
+	ProviderTimestamp      string                    `json:"providerTimestamp,omitempty"`
 }
 
 // Step represents a single verification step in a transaction.
@@ -637,15 +637,15 @@ type EvidenceStep struct {
 
 // Evidence is the audit evidence for a completed transaction.
 type Evidence struct {
-	TenantID      string         `json:"tenantId"`
-	TransactionID string         `json:"transactionId"`
-	EvidenceID    string         `json:"evidenceId"`
-	Status        string         `json:"status"`
-	Signer        EvidenceSigner `json:"signer"`
-	Steps         []EvidenceStep `json:"steps"`
+	TenantID      string            `json:"tenantId"`
+	TransactionID string            `json:"transactionId"`
+	EvidenceID    string            `json:"evidenceId"`
+	Status        string            `json:"status"`
+	Signer        EvidenceSigner    `json:"signer"`
+	Steps         []EvidenceStep    `json:"steps"`
 	Document      *EvidenceDocument `json:"document,omitempty"`
-	CreatedAt     string         `json:"createdAt"`
-	CompletedAt   string         `json:"completedAt,omitempty"`
+	CreatedAt     string            `json:"createdAt"`
+	CompletedAt   string            `json:"completedAt,omitempty"`
 }
 
 // VerificationSigner contains the signer info within a verification response.
@@ -664,21 +664,21 @@ type VerificationStep struct {
 
 // VerificationResponse is returned when verifying evidence.
 type VerificationResponse struct {
-	EvidenceID    string              `json:"evidenceId"`
-	Status        string              `json:"status"`
-	TransactionID string              `json:"transactionId"`
+	EvidenceID    string `json:"evidenceId"`
+	Status        string `json:"status"`
+	TransactionID string `json:"transactionId"`
 	// EnvelopeID is set only when the evidence belongs to a multi-signer envelope.
-	EnvelopeID    string              `json:"envelopeId,omitempty"`
-	Purpose       string              `json:"purpose"`
-	DocumentHash  string              `json:"documentHash,omitempty"`
-	EvidenceHash  string              `json:"evidenceHash"`
-	Policy        *Policy             `json:"policy"`
-	Steps         []VerificationStep  `json:"steps"`
-	Signer        *VerificationSigner `json:"signer,omitempty"`
-	TenantName    string              `json:"tenantName,omitempty"`
-	TenantCNPJ    string              `json:"tenantCnpj,omitempty"`
-	CreatedAt     string              `json:"createdAt"`
-	CompletedAt   string              `json:"completedAt"`
+	EnvelopeID   string              `json:"envelopeId,omitempty"`
+	Purpose      string              `json:"purpose"`
+	DocumentHash string              `json:"documentHash,omitempty"`
+	EvidenceHash string              `json:"evidenceHash"`
+	Policy       *Policy             `json:"policy"`
+	Steps        []VerificationStep  `json:"steps"`
+	Signer       *VerificationSigner `json:"signer,omitempty"`
+	TenantName   string              `json:"tenantName,omitempty"`
+	TenantCNPJ   string              `json:"tenantCnpj,omitempty"`
+	CreatedAt    string              `json:"createdAt"`
+	CompletedAt  string              `json:"completedAt"`
 }
 
 // DownloadArtifact represents a single downloadable artifact.
@@ -774,8 +774,8 @@ type VerifyDocumentResponse struct {
 
 // EnrollUserRequest is the request body for enrolling a user's biometric data.
 type EnrollUserRequest struct {
-	Image  string `json:"image"`           // base64 JPEG (required)
-	CPF    string `json:"cpf"`             // 11 digits (required)
+	Image  string `json:"image"`            // base64 JPEG (required)
+	CPF    string `json:"cpf"`              // 11 digits (required)
 	Source string `json:"source,omitempty"` // BANK_PROVIDED, FIRST_LIVENESS, DOCUMENT_PHOTO
 }
 
@@ -790,6 +790,43 @@ type EnrollUserResponse struct {
 	FaceConfidence       float64 `json:"faceConfidence"`
 	DocumentImageHash    string  `json:"documentImageHash,omitempty"`
 	ExtractionConfidence float64 `json:"extractionConfidence,omitempty"`
+}
+
+// EnrollmentStatusResponse reports whether a user is enrolled and until when.
+//
+// The reference image is hard-deleted by S3 lifecycle RetentionDays after
+// enrolment, while the record outlives it by a grace period. ExpiresAt and
+// Expired are what let an integrator run a re-enrolment sweep instead of
+// discovering the gap as a 422 mid-signature — and the sweep has to happen
+// inside that grace window, because once it passes this route answers 404,
+// which is indistinguishable from "never enrolled".
+type EnrollmentStatusResponse struct {
+	UserExternalID    string `json:"userExternalId"`
+	EnrollmentSource  string `json:"enrollmentSource"`
+	EnrollmentVersion int    `json:"enrollmentVersion"`
+	EnrollmentHash    string `json:"enrollmentHash"`
+	EnrolledAt        string `json:"enrolledAt"`
+	// ExpiresAt is when the reference image is deleted.
+	ExpiresAt string `json:"expiresAt"`
+	// Expired is true once ExpiresAt has passed — re-enrol.
+	Expired       bool `json:"expired"`
+	RetentionDays int  `json:"retentionDays"`
+	// MaskedCPF is masked: this route is enumerable by userExternalId.
+	MaskedCPF         string  `json:"maskedCpf,omitempty"`
+	FaceConfidence    float64 `json:"faceConfidence,omitempty"`
+	DocumentImageHash string  `json:"documentImageHash,omitempty"`
+}
+
+// DeleteEnrollmentResponse is the result of erasing an enrolment (LGPD art. 18).
+type DeleteEnrollmentResponse struct {
+	UserExternalID    string `json:"userExternalId"`
+	Deleted           bool   `json:"deleted"`
+	DeletedAt         string `json:"deletedAt"`
+	EnrollmentVersion int    `json:"enrollmentVersion,omitempty"`
+	// ObjectsDeleted counts objects removed from storage; every version of
+	// each is destroyed.
+	ObjectsDeleted  int `json:"objectsDeleted,omitempty"`
+	VersionsDeleted int `json:"versionsDeleted,omitempty"`
 }
 
 // ServiceHealth contains health info for a single backend service.
