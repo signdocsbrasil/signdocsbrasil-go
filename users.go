@@ -82,3 +82,22 @@ func (s *UsersService) EnrollBatch(ctx context.Context, req *EnrollUsersBatchReq
 	}
 	return &result, nil
 }
+
+// Inspect inspects one candidate photo without storing it.
+//
+// Same verdict the batch endpoint returns, from the same code — a photo must
+// not be judged differently depending on which endpoint you asked. Nothing is
+// persisted and the 90-day retention clock never starts.
+func (s *UsersService) Inspect(ctx context.Context, userExternalID string, req *InspectEnrollmentRequest) (*InspectEnrollmentResponse, error) {
+	req.DryRun = true
+	var result InspectEnrollmentResponse
+	err := s.http.request(ctx, requestOptions{
+		Method: http.MethodPut,
+		Path:   fmt.Sprintf("/v1/users/%s/enrollment", userExternalID),
+		Body:   req,
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

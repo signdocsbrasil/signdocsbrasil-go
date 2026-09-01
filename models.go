@@ -781,15 +781,55 @@ type EnrollUserRequest struct {
 
 // EnrollUserResponse is returned when enrollment succeeds.
 type EnrollUserResponse struct {
-	UserExternalID       string  `json:"userExternalId"`
-	EnrollmentHash       string  `json:"enrollmentHash"`
-	EnrollmentVersion    int     `json:"enrollmentVersion"`
-	EnrollmentSource     string  `json:"enrollmentSource"`
-	EnrolledAt           string  `json:"enrolledAt"`
-	CPF                  string  `json:"cpf"`
+	UserExternalID    string `json:"userExternalId"`
+	EnrollmentHash    string `json:"enrollmentHash"`
+	EnrollmentVersion int    `json:"enrollmentVersion"`
+	EnrollmentSource  string `json:"enrollmentSource"`
+	EnrolledAt        string `json:"enrolledAt"`
+	CPF               string `json:"cpf"`
+
+	// FaceConfidence is Rekognition's detection confidence.
+	//
+	// Read Warnings too. This answers "is this a face?", not "is this a good
+	// reference" — a dark, blurred photo scores 99.99 here and still fails
+	// face matching later.
 	FaceConfidence       float64 `json:"faceConfidence"`
 	DocumentImageHash    string  `json:"documentImageHash,omitempty"`
 	ExtractionConfidence float64 `json:"extractionConfidence,omitempty"`
+
+	// Capture metrics for the stored reference.
+	Quality      *FaceQualityMetrics `json:"quality,omitempty"`
+	Pose         *FacePoseMetrics    `json:"pose,omitempty"`
+	FaceCoverage float64             `json:"faceCoverage,omitempty"`
+
+	// Warnings are quality advisories, present on a *successful* enrolment
+	// too — the photo is stored either way, and knowing it is weak now beats
+	// finding out from a failed signature months later.
+	Warnings []string `json:"warnings,omitempty"`
+}
+
+// InspectEnrollmentRequest inspects a candidate photo without storing it.
+type InspectEnrollmentRequest struct {
+	Image  string `json:"image"`
+	CPF    string `json:"cpf"`
+	Source string `json:"source,omitempty"`
+	DryRun bool   `json:"dryRun"`
+}
+
+// InspectEnrollmentResponse is the verdict for one candidate photo.
+//
+// Status "marginal" is the one to act on: it would enrol without complaint and
+// is exactly what becomes a rejected signature later.
+type InspectEnrollmentResponse struct {
+	DryRun         bool                `json:"dryRun"`
+	UserExternalID string              `json:"userExternalId,omitempty"`
+	Status         string              `json:"status"`
+	Error          string              `json:"error,omitempty"`
+	FaceConfidence float64             `json:"faceConfidence,omitempty"`
+	Quality        *FaceQualityMetrics `json:"quality,omitempty"`
+	Pose           *FacePoseMetrics    `json:"pose,omitempty"`
+	FaceCoverage   float64             `json:"faceCoverage,omitempty"`
+	Warnings       []string            `json:"warnings"`
 }
 
 // BatchEnrollmentItem is one row of a batch enrolment.
