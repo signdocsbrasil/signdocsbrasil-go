@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-08-31
+
+### Added
+
+- **Enrollment read and erase** — `GET` and `DELETE` on
+  `/v1/users/{userExternalId}/enrollment`. Only `PUT` was exposed before, so
+  neither the re-enrolment sweep nor LGPD art. 18 erasure was reachable from
+  the SDK.
+  - `GET` reports `expiresAt` / `expired`. The reference image is hard-deleted
+    by lifecycle 90 days after enrolment and the record outlives it by a grace
+    window *so that* this flag can be found in time. Sweep inside that window:
+    once it closes the record goes too and the route answers `404`, which is
+    indistinguishable from "never enrolled". Miss it and the expiry surfaces as
+    a `422` in the middle of a signature.
+  - `DELETE` destroys every stored version of the reference image, not just the
+    current one — `versionsDeleted` reports how many.
+- **`ENROLLMENT.EXPIRING` / `ENROLLMENT.EXPIRED`** webhook event types.
+- **Per-request biometric thresholds** — `policy.minSimilarity` and
+  `policy.minLivenessConfidence` let a transaction demand more confidence than
+  the account default. They only tighten: a value below the tenant minimum is
+  rejected with `400` naming the current floor rather than silently ignored.
+  Percentages (`95`) and fractions (`0.95`) both pass through untouched.
+- **Advance surface brought in line with the API** — the `confirm_signer` and
+  `complete_document_photo` actions, plus `cpfCnpj`, `documentImage`,
+  `documentType`, `deviceInfo` and the four sandbox scores
+  (`sandboxSimilarity`, `sandboxLivenessConfidence`, `sandboxBrightness`,
+  `sandboxSharpness`). The document-photo fallback flow was previously not
+  reachable from any SDK.
+- **`errorCode` / `errorDetail` / `retryable` / `fallback` on the advance
+  response.** This is the one to read if you integrate biometrics: a rejected
+  step returns **200** with the session still `ACTIVE` and the reason in the
+  body, not as an HTTP error. Code that only branches on the status — or only
+  catches exceptions — reads a rejection as a success. Emitted today:
+  `BIOMETRIC_MATCH_FAILED`, `LIVENESS_NOT_COMPLETED`, `DOCUMENT_QUALITY_LOW`,
+  `DOCUMENT_MATCH_FAILED` and the `SERPRO_*` family.
+- **`referenceImage` on session creation** — a per-transaction reference face,
+  which allows signing without a prior enrolment.
+
 ## [1.10.0] - 2026-08-20
 
 ### Added
