@@ -792,6 +792,94 @@ type EnrollUserResponse struct {
 	ExtractionConfidence float64 `json:"extractionConfidence,omitempty"`
 }
 
+// BatchEnrollmentItem is one row of a batch enrolment.
+type BatchEnrollmentItem struct {
+	UserExternalID string `json:"userExternalId"`
+	Image          string `json:"image"`
+	CPF            string `json:"cpf"`
+	Source         string `json:"source,omitempty"`
+}
+
+// EnrollUsersBatchRequest enrols up to 25 users in one call.
+type EnrollUsersBatchRequest struct {
+	Enrollments []BatchEnrollmentItem `json:"enrollments"`
+
+	// DryRun inspects without writing. Every row is evaluated and returned
+	// with quality metrics, and nothing is persisted — no image reaches
+	// storage, no record is created, and the 90-day retention clock never
+	// starts.
+	//
+	// Rekognition's confidence answers "is this a face?", not "is this a good
+	// reference": a dark, blurred photo enrols happily at 99.99 confidence and
+	// then fails face matching months later, one employee at a time. A dry run
+	// surfaces that while the batch is still in front of you. It costs the same
+	// one Rekognition call per row that enrolling would.
+	DryRun bool `json:"dryRun,omitempty"`
+}
+
+// Advisory reasons a photo is usable but weak.
+const (
+	EnrollmentWarningLowBrightness = "LOW_BRIGHTNESS"
+	EnrollmentWarningLowSharpness  = "LOW_SHARPNESS"
+	EnrollmentWarningFaceTooSmall  = "FACE_TOO_SMALL"
+	EnrollmentWarningHeadTurned    = "HEAD_TURNED"
+)
+
+// FaceQualityMetrics holds Rekognition's 0-100 measures. Dry run only.
+type FaceQualityMetrics struct {
+	Brightness float64 `json:"brightness,omitempty"`
+	Sharpness  float64 `json:"sharpness,omitempty"`
+}
+
+// FacePoseMetrics holds head rotation in degrees. Dry run only.
+type FacePoseMetrics struct {
+	Yaw   float64 `json:"yaw,omitempty"`
+	Pitch float64 `json:"pitch,omitempty"`
+	Roll  float64 `json:"roll,omitempty"`
+}
+
+// BatchEnrollmentResult is one row's outcome.
+type BatchEnrollmentResult struct {
+	Index          int    `json:"index"`
+	UserExternalID string `json:"userExternalId,omitempty"`
+
+	// Status is "enrolled"/"failed" on a real write and
+	// "usable"/"marginal"/"rejected" on a dry run. "marginal" is the one to act
+	// on: it would enrol without complaint today and is exactly what becomes a
+	// rejected signature later.
+	Status string `json:"status"`
+
+	Error             string  `json:"error,omitempty"`
+	EnrollmentVersion int     `json:"enrollmentVersion,omitempty"`
+	ExpiresAt         string  `json:"expiresAt,omitempty"`
+	FaceConfidence    float64 `json:"faceConfidence,omitempty"`
+
+	Quality *FaceQualityMetrics `json:"quality,omitempty"`
+	Pose    *FacePoseMetrics    `json:"pose,omitempty"`
+	// FaceCoverage is the face area as a fraction of the frame, 0-1.
+	FaceCoverage float64  `json:"faceCoverage,omitempty"`
+	Warnings     []string `json:"warnings,omitempty"`
+}
+
+// EnrollUsersBatchResponse is the result of a batch enrolment.
+//
+// Partial success is the point, so this comes back 200 even when rows failed:
+// one unusable photo must not reject the other twenty-four. Read Results, not
+// the absence of an error.
+type EnrollUsersBatchResponse struct {
+	Submitted int `json:"submitted"`
+	// Real writes only.
+	Succeeded int `json:"succeeded,omitempty"`
+	Failed    int `json:"failed,omitempty"`
+	// Dry runs only.
+	DryRun   bool `json:"dryRun,omitempty"`
+	Usable   int  `json:"usable,omitempty"`
+	Marginal int  `json:"marginal,omitempty"`
+	Rejected int  `json:"rejected,omitempty"`
+
+	Results []BatchEnrollmentResult `json:"results"`
+}
+
 // EnrollmentStatusResponse reports whether a user is enrolled and until when.
 //
 // The reference image is hard-deleted by S3 lifecycle RetentionDays after

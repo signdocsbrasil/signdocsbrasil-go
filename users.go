@@ -62,3 +62,23 @@ func (s *UsersService) DeleteEnrollment(ctx context.Context, userExternalID stri
 	}
 	return &result, nil
 }
+
+// EnrollBatch enrols up to 25 users in one request.
+//
+// The documented cap is 25 rows, but the binding limit is the request body —
+// roughly 6MB, and base64 inflates each photo by a third. Keep photos under
+// ~175KB (640x640 is ample) to use all 25 slots.
+//
+// Set DryRun to inspect the photos without storing anything.
+func (s *UsersService) EnrollBatch(ctx context.Context, req *EnrollUsersBatchRequest) (*EnrollUsersBatchResponse, error) {
+	var result EnrollUsersBatchResponse
+	err := s.http.request(ctx, requestOptions{
+		Method: http.MethodPost,
+		Path:   "/v1/users/enrollments",
+		Body:   req,
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
