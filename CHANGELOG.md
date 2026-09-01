@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-09-01
+
+### Added
+
+- **Batch enrollment** — `POST /v1/users/enrollments`, up to 25 users per
+  request. No SDK exposed this endpoint before; the route itself only went live
+  the day prior.
+  - The documented cap is 25 rows, but the binding limit is the request body
+    (~6 MB, and base64 inflates each photo by a third). At 640x640 all 25 slots
+    fit; at full camera resolution you get about 8.
+  - **Partial success returns `200`.** One unusable photo must not reject the
+    other twenty-four, so every row reports its own outcome. Read `results`, not
+    the HTTP status, or a half-failed batch looks like a success.
+- **`dryRun` — reference photo screening.** Inspects every row and writes
+  nothing: no image reaches storage, no record is created, and the 90-day
+  retention clock never starts.
+  - It exists because Rekognition's confidence answers *"is this a face?"*, not
+    *"is this a good reference?"* Measured: a photo at brightness 15 and
+    sharpness 13 enrols successfully at 99.99 confidence, then fails face
+    matching months later, one user at a time.
+  - Three states, since "can I enrol this?" has three answers. **`marginal` is
+    the one to act on** — it enrols without complaint today and is exactly what
+    becomes a rejected signature later.
+  - Rows carry `quality` (brightness, sharpness), `pose` (yaw, pitch, roll),
+    `faceCoverage` and `warnings`: `LOW_BRIGHTNESS`, `LOW_SHARPNESS`,
+    `FACE_TOO_SMALL`, `HEAD_TURNED`.
+  - Costs the same one Rekognition call per row that enrolling costs. The
+    saving is not money — it is not storing biometrics already judged unusable.
+
 ## [1.11.0] - 2026-08-31
 
 ### Added
