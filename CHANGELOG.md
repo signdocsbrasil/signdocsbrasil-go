@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2026-09-01
+
+### Added
+
+- **`referenceQuality`** — one field answering "is this photo good enough as a
+  reference": `usable`, `marginal` or `rejected`. Present on every enrollment
+  response: single, batch row, real write and dry run alike.
+  - Read it instead of deriving the answer from `warnings`. Before this, a real
+    enrolment had no verdict at all while a dry run of the same photo returned
+    one — two shapes for one question.
+  - Deliberately **not** `status`. On a batch row `status` says what happened to
+    the write (`enrolled` / `failed`), which is a different question. A poor
+    photo that stored fine is `status: enrolled` with
+    `referenceQuality: marginal` — the combination worth acting on, and one
+    field could not express it.
+
 ## [1.13.0] - 2026-09-01
 
 ### Added

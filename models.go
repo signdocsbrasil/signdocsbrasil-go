@@ -806,6 +806,16 @@ type EnrollUserResponse struct {
 	// too — the photo is stored either way, and knowing it is weak now beats
 	// finding out from a failed signature months later.
 	Warnings []string `json:"warnings,omitempty"`
+
+	// ReferenceQuality says whether the photo works as a reference: "usable",
+	// "marginal" or "rejected". Read this rather than deriving it from
+	// Warnings.
+	//
+	// Deliberately not Status: on a batch row Status says what happened to the
+	// write ("enrolled"/"failed"), a different question. A poor photo that
+	// stored fine is Status "enrolled" with ReferenceQuality "marginal" — the
+	// combination worth acting on.
+	ReferenceQuality string `json:"referenceQuality,omitempty"`
 }
 
 // InspectEnrollmentRequest inspects a candidate photo without storing it.
@@ -830,6 +840,10 @@ type InspectEnrollmentResponse struct {
 	Pose           *FacePoseMetrics    `json:"pose,omitempty"`
 	FaceCoverage   float64             `json:"faceCoverage,omitempty"`
 	Warnings       []string            `json:"warnings"`
+
+	// ReferenceQuality is the same field a real enrolment returns. In a dry
+	// run it equals Status.
+	ReferenceQuality string `json:"referenceQuality,omitempty"`
 }
 
 // BatchEnrollmentItem is one row of a batch enrolment.
@@ -899,6 +913,16 @@ type BatchEnrollmentResult struct {
 	// FaceCoverage is the face area as a fraction of the frame, 0-1.
 	FaceCoverage float64  `json:"faceCoverage,omitempty"`
 	Warnings     []string `json:"warnings,omitempty"`
+
+	// ReferenceQuality says whether the photo works as a reference: "usable",
+	// "marginal" or "rejected". Read this rather than deriving it from
+	// Warnings.
+	//
+	// Deliberately not Status: on a batch row Status says what happened to the
+	// write ("enrolled"/"failed"), a different question. A poor photo that
+	// stored fine is Status "enrolled" with ReferenceQuality "marginal" — the
+	// combination worth acting on.
+	ReferenceQuality string `json:"referenceQuality,omitempty"`
 }
 
 // EnrollUsersBatchResponse is the result of a batch enrolment.
