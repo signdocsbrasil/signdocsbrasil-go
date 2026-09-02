@@ -86,9 +86,6 @@ const (
 	WebhookEventTransactionDeadlineApproaching WebhookEventType = "TRANSACTION.DEADLINE_APPROACHING"
 
 	// Step events
-	WebhookEventStepStarted               WebhookEventType = "STEP.STARTED"
-	WebhookEventStepCompleted             WebhookEventType = "STEP.COMPLETED"
-	WebhookEventStepFailed                WebhookEventType = "STEP.FAILED"
 	WebhookEventStepPurposeDisclosureSent WebhookEventType = "STEP.PURPOSE_DISCLOSURE_SENT"
 
 	// Enrollment expiry events. The reference image is hard-deleted by S3
@@ -111,6 +108,7 @@ const (
 	// Envelope events (multi-signer flows)
 	WebhookEventEnvelopeCreated   WebhookEventType = "ENVELOPE.CREATED"
 	WebhookEventEnvelopeAllSigned WebhookEventType = "ENVELOPE.ALL_SIGNED"
+	WebhookEventEnvelopeCancelled WebhookEventType = "ENVELOPE.CANCELLED"
 	WebhookEventEnvelopeExpired   WebhookEventType = "ENVELOPE.EXPIRED"
 
 	// Deprecated aliases. The original 1.2.x constants used truncated

@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-02
+
+### Removed
+
+- **BREAKING — three webhook event types left the API**, and with them
+  the `WebhookEventStepStarted`, `WebhookEventStepCompleted` and
+  `WebhookEventStepFailed` constants.
+  They were published for about a year and **never emitted once**: declared in
+  the enum, accepted at registration, produced by nothing. Removed rather than
+  implemented — a step is an internal unit of the policy engine, and at 500
+  sessions a month the three of them would have meant several deliveries per
+  session to say what `SIGNING_SESSION.COMPLETED` and `TRANSACTION.FALLBACK`
+  already say once.
+  - **What to do:** delete them from the `events` array you register with.
+    `POST /v1/webhooks` now rejects them with 400, so a subscription carrying
+    one fails outright rather than silently never firing.
+  - Nothing stops arriving that used to arrive. That is the whole point: no
+    delivery of these ever happened, in any environment.
+  - `STEP.PURPOSE_DISCLOSURE_SENT` is untouched — it is a real NT65 notification
+    with a real producer.
+
+### Changed
+
+- **BREAKING — the module path is now `github.com/signdocsbrasil/signdocsbrasil-go/v2`.**
+  Go requires the major version in the path from v2 onwards, so `go get` and
+  every `import` line must carry the `/v2` suffix. Nothing else about the API
+  moved; this is the language's rule for a major release, not a reorganisation.
+
+### Added
+
+- The three events that *were* declared without a producer and have now been
+  built are emitted by the API as of the same date, and need no SDK change to
+  receive: `TRANSACTION.FAILED` (terminal failure of the hosted flow),
+  `QUOTA.WARNING` (monthly usage crossed 80% of plan, once per dimension per
+  month) and `API.DEPRECATION_NOTICE` (a deprecated endpoint was called, once
+  per endpoint per day).
+- The contract is now 20 event types, every one of which has a producer in the
+  API. A type in this enum that never arrives is a defect to report, not an
+  expectation to calibrate.
+
 ## [1.14.0] - 2026-09-01
 
 ### Added

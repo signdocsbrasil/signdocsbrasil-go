@@ -10,8 +10,16 @@ SDK oficial em Go para a API SignDocsBrasil.
 ## Instalação
 
 ```bash
-go get github.com/signdocsbrasil/signdocsbrasil-go
+go get github.com/signdocsbrasil/signdocsbrasil-go/v2
 ```
+
+> **Vindo da v1?** O caminho do módulo mudou: v2 em diante exige o sufixo `/v2`
+> no `go get` e em todo `import`. Isso é regra do Go, não escolha nossa — um
+> módulo maior que v1 é um caminho de importação diferente. Troque as duas
+> linhas e recompile; o resto da API é igual, com uma exceção: os eventos
+> `STEP.STARTED`, `STEP.COMPLETED` e `STEP.FAILED` deixaram de existir. Se o seu
+> código referencia `WebhookEventStepStarted`, `WebhookEventStepCompleted` ou
+> `WebhookEventStepFailed`, remova — nunca chegou nenhum deles.
 
 ## Início Rápido
 
@@ -23,7 +31,7 @@ import (
     "fmt"
     "log"
 
-    signdocs "github.com/signdocsbrasil/signdocsbrasil-go"
+    signdocs "github.com/signdocsbrasil/signdocsbrasil-go/v2"
 )
 
 func main() {
