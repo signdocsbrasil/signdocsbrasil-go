@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-09-07
+
+### Changed
+
+- Documented that `EnrollUserRequest.Source` takes `ORGANIZATION_PROVIDED`
+  (the default when omitted), `FIRST_LIVENESS` or `DOCUMENT_PHOTO`.
+  `BANK_PROVIDED` is the former name of `ORGANIZATION_PROVIDED` and is still accepted.
+- Package description and keywords now lead in Portuguese, so the SDK is
+  findable on pkg.go.dev for "assinatura digital" and "assinatura eletrônica"
+  rather than only by name.
+
 ## [2.0.0] - 2026-09-02
 
 ### Removed

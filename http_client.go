@@ -16,7 +16,7 @@ import (
 )
 
 // sdkVersion is reported in the User-Agent header.
-const sdkVersion = "2.0.0"
+const sdkVersion = "2.0.1"
 
 // httpClient is the internal HTTP client used by all service methods.
 type httpClient struct {
