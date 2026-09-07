@@ -1,4 +1,8 @@
-// Package signdocsbrasil provides a Go client for the SignDocs Brasil API.
+// Package signdocsbrasil provides a Go client for the SignDocs Brasil
+// electronic-signature API (assinatura eletrônica e digital, ICP-Brasil).
+//
+// SDK oficial em Go para a API SignDocs Brasil: assinatura eletrônica e digital
+// com ICP-Brasil, certificado digital, biometria, OTP e trilha de evidências.
 //
 // The client supports both client_secret and private_key_jwt (ES256) authentication,
 // automatic token caching and refresh, retry with exponential backoff, pagination,

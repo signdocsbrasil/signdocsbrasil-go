@@ -1,6 +1,8 @@
 # signdocsbrasil-go
 
-SDK oficial em Go para a API SignDocsBrasil.
+SDK oficial em Go para a API SignDocs Brasil: assinatura eletrônica e digital de documentos com ICP-Brasil, certificado digital, biometria, OTP e trilha de evidências.
+
+Official Go SDK for the SignDocs Brasil e-signature API.
 
 ## Requisitos
 
