@@ -774,7 +774,10 @@ type VerifyDocumentResponse struct {
 type EnrollUserRequest struct {
 	Image  string `json:"image"`            // base64 JPEG (required)
 	CPF    string `json:"cpf"`              // 11 digits (required)
-	Source string `json:"source,omitempty"` // BANK_PROVIDED, FIRST_LIVENESS, DOCUMENT_PHOTO
+	// ORGANIZATION_PROVIDED (default), FIRST_LIVENESS or DOCUMENT_PHOTO.
+	// BANK_PROVIDED is the former name of ORGANIZATION_PROVIDED and is still
+	// accepted, normalised away on write.
+	Source string `json:"source,omitempty"`
 }
 
 // EnrollUserResponse is returned when enrollment succeeds.
