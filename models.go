@@ -139,8 +139,10 @@ func IsNT65Event(e WebhookEventType) bool {
 type OtpChannel string
 
 const (
-	OtpChannelEmail OtpChannel = "email"
-	OtpChannelSMS   OtpChannel = "sms"
+	OtpChannelEmail    OtpChannel = "email"
+	OtpChannelSMS      OtpChannel = "sms"
+	OtpChannelWhatsApp OtpChannel = "whatsapp"
+	OtpChannelTelegram OtpChannel = "telegram"
 )
 
 // GeolocationSource represents the source of geolocation data.

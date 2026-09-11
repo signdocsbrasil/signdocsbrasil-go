@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `DeliverVia []string` on `CreateSigningSessionRequest` and
+  `AddEnvelopeSessionRequest` (`json:"deliverVia,omitempty"`): the channels
+  SignDocs uses to deliver the signing link to that signer, `"email"`,
+  `"whatsapp"` and/or `"telegram"`. Leave it nil and nothing changes: the
+  invite email only, as before. WhatsApp and Telegram are enabled per tenant
+  on request; `"whatsapp"` requires `Signer.Phone` in E.164 and `"telegram"`
+  requires `Signer.CPF`. Each WhatsApp or Telegram send consumes the tenant's
+  message quota; once it runs out the API responds 429.
+- `WhatsAppInviteSent` and `TelegramInviteSent` on `SigningSession` and
+  `EnvelopeSession` (`json:"whatsappInviteSent,omitempty"` /
+  `json:"telegramInviteSent,omitempty"`), next to `InviteSent`.
+  `WhatsAppInviteSent` is true only when Meta accepted the message (accepted,
+  not delivered); `TelegramInviteSent` is false when the link did not reach
+  the signer over Telegram.
+
+### Changed
+
+- `OtpChannel` gained `OtpChannelWhatsApp` (`"whatsapp"`) and
+  `OtpChannelTelegram` (`"telegram"`), matching the API, which accepts both
+  alongside `email` and `sms`.
+  - **Heads-up:** `BootstrapSigner.AvailableOtpChannels` is a response field,
+    so it can now carry the two new values. A `switch` over `OtpChannel` that
+    treats `default` as unreachable, or one checked by an exhaustiveness
+    linter, needs the two new cases.
+
 ## [2.0.1] - 2026-09-07
 
 ### Changed

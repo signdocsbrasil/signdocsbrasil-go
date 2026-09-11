@@ -43,6 +43,12 @@ type AddEnvelopeSessionRequest struct {
 	ReturnURL   string                `json:"returnUrl,omitempty"`
 	CancelURL   string                `json:"cancelUrl,omitempty"`
 	Metadata    map[string]string     `json:"metadata,omitempty"`
+	// DeliverVia lists the channels SignDocs uses to deliver the signing link
+	// to this signer; each signer picks their own. Leave nil to keep the
+	// previous behavior (the invite email only). In a SEQUENTIAL envelope a
+	// later signer receives the link over these channels when their turn
+	// comes. Same rules as CreateSigningSessionRequest.DeliverVia.
+	DeliverVia []string `json:"deliverVia,omitempty"`
 }
 
 // EnvelopeSessionSigner represents the signer details for an envelope session.
@@ -76,6 +82,13 @@ type EnvelopeSession struct {
 	// the envelope was created with an Owner and Signer.Email differs
 	// from Owner.Email.
 	InviteSent bool `json:"inviteSent,omitempty"`
+	// WhatsAppInviteSent is true when Meta accepted the WhatsApp message
+	// carrying the link — accepted, not delivered.
+	WhatsAppInviteSent bool `json:"whatsappInviteSent,omitempty"`
+	// TelegramInviteSent reports the Telegram delivery when DeliverVia
+	// included "telegram"; false means the link did not reach the signer
+	// over Telegram (no CPF registered with the bot, or the send failed).
+	TelegramInviteSent bool `json:"telegramInviteSent,omitempty"`
 }
 
 // EnvelopeSessionSummary represents a session summary within an envelope detail.

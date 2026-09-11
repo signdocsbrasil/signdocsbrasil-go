@@ -31,6 +31,14 @@ type CreateSigningSessionRequest struct {
 	Appearance       *SigningSessionAppearance `json:"appearance,omitempty"`
 	// See Owner for behavior when set.
 	Owner *Owner `json:"owner,omitempty"`
+	// DeliverVia lists the channels SignDocs uses to deliver the signing link
+	// to this signer: "email", "whatsapp" and/or "telegram". Leave nil to keep
+	// the previous behavior (the invite email only, under the Owner rule).
+	// WhatsApp and Telegram are enabled on request; "whatsapp" requires
+	// Signer.Phone in E.164 and "telegram" requires Signer.CPF. Each WhatsApp
+	// or Telegram send consumes the tenant's message quota (429 once it runs
+	// out).
+	DeliverVia []string `json:"deliverVia,omitempty"`
 }
 
 // DocumentRequest represents an inline document.
@@ -65,6 +73,13 @@ type SigningSession struct {
 	// Signer.Email at session creation. Populated only when Owner was
 	// provided and Signer.Email differs from Owner.Email.
 	InviteSent bool `json:"inviteSent,omitempty"`
+	// WhatsAppInviteSent is true when Meta accepted the WhatsApp message
+	// carrying the link — accepted, not delivered.
+	WhatsAppInviteSent bool `json:"whatsappInviteSent,omitempty"`
+	// TelegramInviteSent reports the Telegram delivery when DeliverVia
+	// included "telegram"; false means the link did not reach the signer
+	// over Telegram (no CPF registered with the bot, or the send failed).
+	TelegramInviteSent bool `json:"telegramInviteSent,omitempty"`
 }
 
 // SigningSessionStatus is the lightweight status used for polling.

@@ -149,6 +149,30 @@ if err != nil {
 fmt.Println(session1.URL, session2.URL)
 ```
 
+## Canais de entrega
+
+A SignDocs entrega o link por e-mail, WhatsApp ou Telegram — escolha por signatário em `deliverVia`. WhatsApp e Telegram são habilitados sob demanda; fale com o time comercial. WhatsApp exige `signer.phone` em E.164; Telegram exige `signer.cpf` e só alcança quem já registrou o CPF no bot da SignDocs. O OTP pode ir por `email`, `sms`, `whatsapp` ou `telegram` (`otpChannel`), independentemente do canal do link. Cada envio por WhatsApp ou Telegram consome a cota de mensagens do tenant; esgotada, a API responde 429.
+
+```go
+session, err := client.SigningSessions.Create(ctx, &signdocs.CreateSigningSessionRequest{
+    Purpose: "DOCUMENT_SIGNATURE",
+    Policy:  signdocs.Policy{Profile: signdocs.PolicyProfileClickOnly},
+    Signer: signdocs.Signer{
+        Name:           "João Silva",
+        CPF:            "12345678901",
+        Phone:          "+5511999998888",
+        UserExternalID: "user-001",
+    },
+    Document:   &signdocs.DocumentRequest{Content: pdfBase64, Filename: "contrato.pdf"},
+    DeliverVia: []string{"whatsapp"},
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println(session.WhatsAppInviteSent) // true quando a Meta aceitou a mensagem
+```
+
 ## Configuração Avançada
 
 ### HTTP Client customizado
