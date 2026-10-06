@@ -370,3 +370,43 @@ func TestModel_ProblemDetail(t *testing.T) {
 		t.Errorf("expected instance '/v1/transactions', got %q", pd.Instance)
 	}
 }
+
+func TestCompleteSigningResponse_SignatureTimestamp(t *testing.T) {
+	var resp CompleteSigningResponse
+	if err := json.Unmarshal(fixtureResponseBody(t, "signing-complete-timestamp.json"), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	ts := resp.Result.DigitalSignature.SignatureTimestamp
+	if ts == nil {
+		t.Fatal("expected SignatureTimestamp")
+	}
+	if ts.GenTime != "2024-11-15T12:05:02.123Z" || ts.PolicyOID != "2.16.76.1.6.2" || ts.Serial != "78F42C1F9B1D36B9" {
+		t.Errorf("unexpected timestamp: %+v", ts)
+	}
+}
+
+func TestCompleteSigningResponse_NoSignatureTimestamp(t *testing.T) {
+	var resp CompleteSigningResponse
+	if err := json.Unmarshal(fixtureResponseBody(t, "signing-complete.json"), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if resp.Result.DigitalSignature.SignatureTimestamp != nil {
+		t.Errorf("expected no SignatureTimestamp, got %+v", resp.Result.DigitalSignature.SignatureTimestamp)
+	}
+}
+
+func TestProblemDetail_TimestampUnavailableCode(t *testing.T) {
+	var pd ProblemDetail
+	if err := json.Unmarshal(fixtureResponseBody(t, "error-503-timestamp.json"), &pd); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if pd.Status != 503 || pd.Detail == "" {
+		t.Errorf("standard members not parsed: %+v", pd)
+	}
+	if pd.Code() != "TIMESTAMP_UNAVAILABLE" || !pd.Retryable() {
+		t.Errorf("Code()=%q Retryable()=%v", pd.Code(), pd.Retryable())
+	}
+	if _, ok := pd.Extra["status"]; ok {
+		t.Error("standard members must not be duplicated into Extra")
+	}
+}

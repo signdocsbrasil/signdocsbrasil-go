@@ -1,0 +1,22 @@
+{
+  "description": "Signature timestamp (ACT) unavailable — retryable, signature request still pending",
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "Retry-After": "30"
+    },
+    "body": {
+      "type": "https://api.signdocs.com.br/errors/service-unavailable",
+      "title": "Service Unavailable",
+      "status": 503,
+      "detail": "O serviço de carimbo do tempo está indisponível no momento. Tente assinar novamente em instantes.",
+      "code": "TIMESTAMP_UNAVAILABLE",
+      "retryable": true
+    }
+  },
+  "expected_error": {
+    "class": "ServiceUnavailableError",
+    "status": 503
+  }
+}

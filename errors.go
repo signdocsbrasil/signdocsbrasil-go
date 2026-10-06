@@ -1,6 +1,7 @@
 package signdocsbrasil
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -12,6 +13,43 @@ type ProblemDetail struct {
 	Detail   string         `json:"detail,omitempty"`
 	Instance string         `json:"instance,omitempty"`
 	Extra    map[string]any `json:"-"`
+}
+
+// UnmarshalJSON keeps every member beyond the RFC 7807 five in Extra, so
+// extensions such as "code" and "retryable" reach the caller.
+func (p *ProblemDetail) UnmarshalJSON(data []byte) error {
+	type plain ProblemDetail
+	var known plain
+	if err := json.Unmarshal(data, &known); err != nil {
+		return err
+	}
+	var all map[string]any
+	if err := json.Unmarshal(data, &all); err != nil {
+		return err
+	}
+	for _, k := range []string{"type", "title", "status", "detail", "instance"} {
+		delete(all, k)
+	}
+	*p = ProblemDetail(known)
+	if len(all) > 0 {
+		p.Extra = all
+	}
+	return nil
+}
+
+// Code returns the stable machine-readable case when the API gives one
+// (e.g. "TIMESTAMP_UNAVAILABLE", "SIGNER_TURN"), or "".
+func (p ProblemDetail) Code() string {
+	if s, ok := p.Extra["code"].(string); ok {
+		return s
+	}
+	return ""
+}
+
+// Retryable reports whether the API states that resending the same request is safe.
+func (p ProblemDetail) Retryable() bool {
+	b, ok := p.Extra["retryable"].(bool)
+	return ok && b
 }
 
 // SignDocsBrasilError is the interface implemented by all SDK errors.

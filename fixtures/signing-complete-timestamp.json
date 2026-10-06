@@ -1,0 +1,41 @@
+{
+  "description": "Complete digital signature on a tenant with ICP-Brasil signature timestamp (carimbo do tempo)",
+  "input": {
+    "transactionId": "tx-uuid-001",
+    "signatureRequestId": "sigreq-uuid-001",
+    "rawSignatureBase64": "MEUCIA...base64signature..."
+  },
+  "expected_request": {
+    "method": "POST",
+    "path": "/v1/transactions/tx-uuid-001/signing/complete",
+    "body": {
+      "signatureRequestId": "sigreq-uuid-001",
+      "rawSignatureBase64": "MEUCIA...base64signature..."
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "stepId": "step-uuid-sign-001",
+      "status": "COMPLETED",
+      "result": {
+        "digitalSignature": {
+          "certificateSubject": "CN=JOAO SILVA:12345678901, OU=AC EXAMPLE, O=ICP-Brasil",
+          "certificateSerial": "1234567890ABCDEF",
+          "certificateIssuer": "CN=AC EXAMPLE v5, O=ICP-Brasil",
+          "algorithm": "SHA256withRSA",
+          "signedAt": "2024-11-15T12:05:00.000Z",
+          "signedPdfHash": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
+          "signatureFieldName": "SignDocs_1",
+          "signatureTimestamp": {
+            "genTime": "2024-11-15T12:05:02.123Z",
+            "tsaName": "C=BR, O=ICP-Brasil, OU=Certificado Carimbo de Tempo, CN=SERVIDOR DE CARIMBO DE TEMPO ACT EXAMPLE",
+            "serial": "78F42C1F9B1D36B9",
+            "policyOid": "2.16.76.1.6.2",
+            "tokenSha256": "3f1c0a8e9b7d6c5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a"
+          }
+        }
+      }
+    }
+  }
+}

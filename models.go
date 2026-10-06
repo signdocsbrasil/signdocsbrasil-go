@@ -271,6 +271,20 @@ type DigitalSignatureResult struct {
 	SignedPDFHash      string `json:"signedPdfHash"`
 	SignedPDFS3Key     string `json:"signedPdfS3Key,omitempty"`
 	SignatureFieldName string `json:"signatureFieldName"`
+	// SignatureTimestamp is set when the tenant has ICP-Brasil signature timestamps enabled.
+	SignatureTimestamp *SignatureTimestamp `json:"signatureTimestamp,omitempty"`
+}
+
+// SignatureTimestamp is the ICP-Brasil signature timestamp (carimbo do tempo)
+// embedded in the signature: an RFC 3161 token from an accredited ACT.
+// GenTime is the time attested by the ACT; SignedAt on the signature result
+// remains the SignDocs server time.
+type SignatureTimestamp struct {
+	GenTime     string `json:"genTime"`
+	TSAName     string `json:"tsaName"`
+	Serial      string `json:"serial"`
+	PolicyOID   string `json:"policyOid"`
+	TokenSHA256 string `json:"tokenSha256"`
 }
 
 // PurposeDisclosureResult contains the result of a purpose disclosure step.
@@ -549,6 +563,11 @@ type CompleteSigningDigitalSignatureResult struct {
 	SignedAt           string `json:"signedAt"`
 	SignedPDFHash      string `json:"signedPdfHash"`
 	SignatureFieldName string `json:"signatureFieldName"`
+	// SignedP7sHash and DocumentFormat are set for generic (non-PDF) documents.
+	SignedP7sHash  string `json:"signedP7sHash,omitempty"`
+	DocumentFormat string `json:"documentFormat,omitempty"`
+	// SignatureTimestamp is set when the tenant has ICP-Brasil signature timestamps enabled.
+	SignatureTimestamp *SignatureTimestamp `json:"signatureTimestamp,omitempty"`
 }
 
 // CompleteSigningResult wraps the digital signature result.
@@ -660,9 +679,16 @@ type VerificationStep struct {
 	Status      string `json:"status"`
 	Order       int    `json:"order"`
 	CompletedAt string `json:"completedAt,omitempty"`
+	// SignatureTimestamp summarizes the ACT timestamp on a DIGITAL_SIGN_A1 step, when present.
+	SignatureTimestamp *VerificationSignatureTimestamp `json:"signatureTimestamp,omitempty"`
 }
 
-// VerificationResponse is returned when verifying evidence.
+// VerificationSignatureTimestamp is the public summary of a signature timestamp.
+type VerificationSignatureTimestamp struct {
+	GenTime   string `json:"genTime"`
+	TSAName   string `json:"tsaName"`
+	PolicyOID string `json:"policyOid"`
+}
 type VerificationResponse struct {
 	EvidenceID    string `json:"evidenceId"`
 	Status        string `json:"status"`
